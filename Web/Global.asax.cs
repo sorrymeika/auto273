@@ -24,14 +24,27 @@ namespace Web
             routes.MapRoute(
                 "Item",
                 "{handle}/{id}.html",
-                new { controller = "Home", action = "Index", catalog = "Product" },
+                new { controller = "Core", action = "Index", catalog = "Item" },
                 new { handle = "^Item$", id = "^\\d+$" }
             );
 
+            #region 默认
             routes.MapRoute(
                 "Entrance",
                 "",
                 new { controller = "Core", action = "Home" }
+            );
+
+            routes.MapRoute(
+               "JsonDefault",
+               "Json/{catalog}/{handle}",
+               new { controller = "Core", action = "JsonAction", catalog = "", handle = "" }
+            );
+
+            routes.MapRoute(
+               "Manage",
+               "Manage/{catalog}/{handle}",
+               new { controller = "Core", action = "Manage", catalog = "Login", handle = "" }
             );
 
             routes.MapRoute(
@@ -47,28 +60,17 @@ namespace Web
             );
 
             routes.MapRoute(
-               "JsonDefault",
-               "json/{catalog}/{handle}",
-               new { controller = "Core", action = "JsonAction", catalog = "", handle = "" }
-            );
-
-            routes.MapRoute(
-               "Manage",
-               "manage/{catalog}/{handle}",
-               new { controller = "Core", action = "Manage", catalog = "Login", handle = "" }
-            );
-
-            routes.MapRoute(
-                "CheckCode",
-                "CheckCode/{id}.jpg",
-                new { controller = "Core", action = "CheckCode", id = @"\d+" }
-            );
-
-            routes.MapRoute(
                "ImagePreview",
                "ImagePreview",
                new { controller = "Core", action = "ImagePreview" }
             );
+
+            routes.MapRoute(
+               "CheckCode",
+               "CheckCode/{id}.jpg",
+               new { controller = "Core", action = "CheckCode", id = @"\d+" }
+            );
+            #endregion
 
             #region 支付宝
             routes.MapRoute(

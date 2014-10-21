@@ -319,15 +319,8 @@
     <Content Include="js\lib\validation.js" />
     <Content Include="js\seajs\sea.js" />
     <Content Include="theme\ie.css" />
-    <Content Include="theme\images\alipay.png" />
-    <Content Include="theme\images\appdl.jpg" />
-    <Content Include="theme\images\fav.png" />
     <Content Include="theme\images\ico_loading.gif" />
-    <Content Include="theme\images\learn_l.jpg" />
-    <Content Include="theme\images\learn_r.jpg" />
-    <Content Include="theme\images\logo.png" />
     <Content Include="theme\images\site.png" />
-    <Content Include="theme\images\text_bg.png" />
     <Content Include="theme\style.css" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -351,9 +344,7 @@
     <Content Include="Views\Manage\Admin\Feedback.cshtml" />
     <Content Include="Views\Manage\Admin\ModifyPwd.cshtml" />
     <Content Include="Views\Manage\Admin\ServiceEmail.cshtml" />
-    <Content Include="Views\Manage\Index.cshtml" />
     <Content Include="Views\Manage\Login.cshtml" />
-    <Content Include="Views\Manage\Menu.cshtml" />
     <Content Include="Views\Manage\Test.cshtml" />
   </ItemGroup>
   <ItemGroup>
@@ -368,6 +359,15 @@
       <Project>{D8E09BBC-5A9D-441B-B403-988286537F2B}</Project>
       <Name>SL</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\_ManageLayout.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Manage\Signout.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Manage\Shop\Shop.cshtml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

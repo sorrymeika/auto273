@@ -1,16 +1,14 @@
-﻿@using Web.Service
+﻿@using SL.Util
 @{
-    Layout = null;
-
     if (Request.QueryString["action"] == "login")
     {
-        Req req = new Req();
-        var checkCode = SessionService.Get<string>("CheckCode");
+        RequestUtil req = new RequestUtil();
+        var checkCode = SessionUtil.Get<string>("CheckCode");
         string adminName = req.String("mobile", false, "请填写用户名");
         string password = req.Password("password", "请填写密码");
         string validcode = req.String("validcode", false, "请填写验证码", compare: checkCode, compareText: "验证码不正确");
 
-        SessionService.Remove("CheckCode");
+        SessionUtil.Remove("CheckCode");
 
         if (req.HasError)
         {
@@ -18,15 +16,15 @@
         }
         else
         {
-            bool exists = SQL.QueryScalar<bool>("if exists (select 1 from Admin where Password=@p0 and AdminName=@p1) select 1 else select 0", password, adminName);
+            bool exists = SL.Data.SQL.QueryValue<bool>("if exists (select 1 from Admin where Password=@p0 and AdminName=@p1) select 1 else select 0", password, adminName);
             if (!exists)
             {
                 ViewBag.error = "用户名或密码不正确，登录失败";
             }
             else
             {
-                SessionService.Set("Admin", adminName);
-                Response.Redirect("user/users");
+                SessionUtil.Set("Admin", adminName);
+                Response.Redirect(Url.Content("~/Manage/Admin/ModifyPwd"));
                 return;
             }
         }
@@ -41,12 +39,12 @@
         html { height: 100%; font-family: 微软雅黑; font-size: 12px; }
         body { height: 100%; margin: 0px; padding: 0px; background: #f1f1f1; }
         img { vertical-align: middle; }
-        .validator { padding: 0px 20px; margin: 0px auto; width: 420px; overflow: hidden; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; background: #fff; }
+        .validator { padding: 0px 20px; margin: 0px auto; width: 400px; overflow: hidden; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; background: #fff; }
         .l { float: left; height: 100%; margin-right: 40px; border-right: 1px solid #ddd; padding-top: 20px; margin-bottom: -10000px; padding-bottom: 10000px; }
         .vldtit { line-height: 20px; background: #64a0de; border-right: 3px solid #4c88c7; font-size: 18px; color: #fff; overflow: hidden; padding: 10px 20px; text-align: right; float: left; }
         .vldtit i { display: block; font-style: normal; }
         .vldtit a { float: right; }
-        .vldcon { padding: 30px; }
+        .vldcon { padding: 30px 20px; }
         .vldcon td { padding-top: 8px; }
         #submit { }
         #validcode { width: 80px; }
@@ -74,7 +72,7 @@
                             <tr>
                                 <td>验证码：</td>
                                 <td><input id="validcode" name="validcode" type="text" />
-                                    <img alt="无法显示？点击刷新" title="看不清？点击刷新" src="/checkcode/@(((DateTime.Now.Ticks - DateTime.MinValue.Ticks) / 10000000).ToString()).jpg" onclick="this.src='/checkcode/1.jpg?_r='+new Date().getTime()" /></td>
+                                    <img alt="无法显示？点击刷新" title="看不清？点击刷新" src="@Url.Content("~/checkcode/")@(((DateTime.Now.Ticks - DateTime.MinValue.Ticks) / 10000000).ToString()).jpg" onclick="this.src='@Url.Content("~/checkcode/1.jpg")?_r='+new Date().getTime()" /></td>
                             </tr>
                         </table>
                         <table width="100%">
@@ -92,5 +90,8 @@
             </td>
         </tr>
     </table>
+    <script>
+
+    </script>
 </body>
 </html>

@@ -32,7 +32,6 @@
         (!options.visible)&&button.hide();
 
         me._button=button;
-
         if(options.disabled)
             me.disable();
         else

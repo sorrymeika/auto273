@@ -16,6 +16,7 @@ namespace Web.Controllers
 {
     public class CoreController : Controller
     {
+        #region 页面路由
         public ActionResult Index(string catalog, string handle)
         {
             this.ViewBag.RouteData = this.RouteData.Values;
@@ -44,82 +45,9 @@ namespace Web.Controllers
             }
             return View("~/Views/Manage/" + catalog + (string.IsNullOrEmpty(handle) ? "" : ("/" + handle)) + ".cshtml");
         }
-
-        #region 图片上传
-        public ActionResult Upload(string dir = null)
-        {
-            HttpPostedFileBase imgFile = Request.Files["imgFile"];
-            if (imgFile == null)
-            {
-                return showError("请选择文件。");
-            }
-
-            int maxSize = 5000000;
-
-            if (imgFile.InputStream == null || imgFile.InputStream.Length > maxSize)
-            {
-                return showError("上传文件大小超过限制。");
-            }
-
-            //定义允许上传的文件扩展名
-            Dictionary<string, string> extTable = new Dictionary<string, string>();
-            extTable.Add("image", "gif,jpg,jpeg,png,bmp");
-            extTable.Add("flash", "swf,flv");
-            extTable.Add("media", "swf,flv,mp3,wav,wma,wmv,mid,avi,mpg,asf,rm,rmvb");
-            extTable.Add("file", "doc,docx,xls,xlsx,ppt,htm,html,txt,zip,rar,gz,bz2");
-            String dirName = dir;
-            if (String.IsNullOrEmpty(dirName))
-            {
-                dirName = "image";
-            }
-            if (!extTable.ContainsKey(dirName))
-            {
-                return showError("目录名不正确。");
-            }
-
-            string dirDay = DateTime.Today.ToString("yy-MM-dd");
-            String dirPath = Server.MapPath("~/upload") + "\\" + dirName + "\\" + dirDay;
-            if (!Directory.Exists(dirPath))
-            {
-                Directory.CreateDirectory(dirPath);
-            }
-
-            String fileName = imgFile.FileName;
-            String fileExt = Path.GetExtension(fileName).ToLower();
-
-            if (String.IsNullOrEmpty(fileExt) || Array.IndexOf(((String)extTable[dirName]).Split(','), fileExt.Substring(1).ToLower()) == -1)
-            {
-                return showError("上传文件扩展名是不允许的扩展名。\n只允许" + ((String)extTable[dirName]) + "格式。");
-            }
-
-            String newFileName = DateTime.Now.ToString("yyyyMMddHHmmss_ffff", DateTimeFormatInfo.InvariantInfo) + fileExt;
-            String filePath = Path.Combine(dirPath, newFileName);
-
-            imgFile.SaveAs(filePath);
-
-            String fileUrl = "http://" + Request.Url.Authority + "/upload/" + dirName + "/" + dirDay + "/" + newFileName;
-
-            return Content(new JavaScriptSerializer().Serialize(new { error = 0, url = fileUrl }));
-        }
-
-        private ActionResult showError(string msg)
-        {
-            return Content(new JavaScriptSerializer().Serialize(new { error = 1, message = msg }));
-        }
         #endregion
 
-        #region 验证码
-        public ActionResult CheckCode()
-        {
-            string checkCode;
-            byte[] imageBuffer = ImageUtil.CreateImage(out checkCode);
-            Session["CheckCode"] = checkCode;
-
-            return File(imageBuffer, "image/Jpeg");
-        }
-        #endregion
-
-        #region 订单支付（支付宝）
+        #region 支付宝（WAP）
         private Dictionary<string, object> GetOrder(int orderid)
         {
             return null;
@@ -309,6 +237,8 @@ namespace Web.Controllers
             }
         }
         #endregion
+
+        #region 支付宝（网页）
 
         #region 支付宝跳转
         public ActionResult alipayto(int orderId)
@@ -630,6 +560,71 @@ namespace Web.Controllers
         }
         #endregion
 
+        #endregion
+
+        #region 图片上传
+        public ActionResult Upload(string dir = null)
+        {
+            HttpPostedFileBase imgFile = Request.Files["imgFile"];
+            if (imgFile == null)
+            {
+                return showError("请选择文件。");
+            }
+
+            int maxSize = 5000000;
+
+            if (imgFile.InputStream == null || imgFile.InputStream.Length > maxSize)
+            {
+                return showError("上传文件大小超过限制。");
+            }
+
+            //定义允许上传的文件扩展名
+            Dictionary<string, string> extTable = new Dictionary<string, string>();
+            extTable.Add("image", "gif,jpg,jpeg,png,bmp");
+            extTable.Add("flash", "swf,flv");
+            extTable.Add("media", "swf,flv,mp3,wav,wma,wmv,mid,avi,mpg,asf,rm,rmvb");
+            extTable.Add("file", "doc,docx,xls,xlsx,ppt,htm,html,txt,zip,rar,gz,bz2");
+            String dirName = dir;
+            if (String.IsNullOrEmpty(dirName))
+            {
+                dirName = "image";
+            }
+            if (!extTable.ContainsKey(dirName))
+            {
+                return showError("目录名不正确。");
+            }
+
+            string dirDay = DateTime.Today.ToString("yy-MM-dd");
+            String dirPath = Server.MapPath("~/upload") + "\\" + dirName + "\\" + dirDay;
+            if (!Directory.Exists(dirPath))
+            {
+                Directory.CreateDirectory(dirPath);
+            }
+
+            String fileName = imgFile.FileName;
+            String fileExt = Path.GetExtension(fileName).ToLower();
+
+            if (String.IsNullOrEmpty(fileExt) || Array.IndexOf(((String)extTable[dirName]).Split(','), fileExt.Substring(1).ToLower()) == -1)
+            {
+                return showError("上传文件扩展名是不允许的扩展名。\n只允许" + ((String)extTable[dirName]) + "格式。");
+            }
+
+            String newFileName = DateTime.Now.ToString("yyyyMMddHHmmss_ffff", DateTimeFormatInfo.InvariantInfo) + fileExt;
+            String filePath = Path.Combine(dirPath, newFileName);
+
+            imgFile.SaveAs(filePath);
+
+            String fileUrl = "http://" + Request.Url.Authority + "/upload/" + dirName + "/" + dirDay + "/" + newFileName;
+
+            return Content(System.Web.Helpers.Json.Encode(new { error = 0, url = fileUrl }));
+        }
+
+        private ActionResult showError(string msg)
+        {
+            return Content(System.Web.Helpers.Json.Encode(new { error = 1, message = msg }));
+        }
+        #endregion
+
         #region 图片预览
         [HttpPost]
         public ActionResult ImagePreview()
@@ -702,6 +697,17 @@ namespace Web.Controllers
             {
                 return Content(dataUrl);
             }
+        }
+        #endregion
+
+        #region 验证码
+        public ActionResult CheckCode()
+        {
+            string checkCode;
+            byte[] imageBuffer = ImageUtil.CreateImage(out checkCode);
+            Session["CheckCode"] = checkCode;
+
+            return File(imageBuffer, "image/Jpeg");
         }
         #endregion
 
