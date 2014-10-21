@@ -1,0 +1,42 @@
+﻿@using XX_PhotoPrint.Service
+@{
+    Layout = null;
+
+    int uid;
+
+    if (!AuthHelper.CheckAuth(out uid))
+    {
+        Json.Write(new { success = false, returnCode = "0000", msg = "授权错误" }, Output);
+        return;
+    }
+
+    SL.Util.RequestUtil req = new SL.Util.RequestUtil();
+
+    IList<Dictionary<string, object>> data;
+    string url = "http://" + Request.Url.Authority + "/Content/";
+    using (DbService db = new DbService())
+    {
+        string sql = "select a.CartID,a.UserWorkID,a.Qty,b.ProductID,c.ProductName,b.Picture,c.Price from Cart a join UserWork b on a.UserWorkID=b.UserWorkID join Product c on b.ProductID=c.ProductID where a.UserID=@p0 and c.Deleted=0";
+
+        string ids = req.String("ids", false, "", regex: @"\d+(,\d+)*", regexText: "");
+        if (!req.HasError)
+        {
+            sql += " and a.CartID in (" + ids + ")";
+        }
+
+        data = db.Query(sql, uid);
+        if (data != null)
+        {
+            Dictionary<string, object> item;
+            for (var i = 0; i < data.Count; i++)
+            {
+                item = data[i];
+                item["Picture"] = url + item["Picture"];
+                item["Styles"] = db.Query("select a.StyleID,StyleName,Rect,b.ColorID,c.ColorName,b.SizeID,SizeName from Style a left join UserCustomization b on a.StyleID=b.StyleID left join Color c on b.ColorID=c.ColorID left join ProductSize d on b.SizeID=d.SizeID where UserWorkID=@p0 order by a.StyleID", item["UserWorkID"]);
+            }
+        }
+    }
+
+    Json.Write(new { success = true, data = data }, Output);
+    return;
+}

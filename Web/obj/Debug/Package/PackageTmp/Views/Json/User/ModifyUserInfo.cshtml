@@ -1,0 +1,42 @@
+﻿@using XX_PhotoPrint.Service
+@using System.Web.Script.Serialization
+@{
+    Layout = null;
+
+    int uid;
+
+    if (!AuthHelper.CheckAuth(out uid))
+    {
+        Json.Write(new { success = false, returnCode = "0000", msg = "授权错误" }, Output);
+        return;
+    }
+
+    var req = new Req();
+
+    string userName = req.String("UserName");
+    string gender = req.String("Gender");
+    string birthday = req.String("Birthday");
+    string mobile = req.String("Mobile", regex: @"1\d{10}", regexText: "请输入正确的手机号");
+    string realName = req.String("RealName");
+
+    if (req.HasError)
+    {
+        Json.Write(new { success = false, msg = req.FirstError, errors = req.GetErrors() }, Output);
+        return;
+    }
+
+    var user = SQL.QueryOne("select UserID,UserName,Gender,Birthday,Mobile,RealName from Users where UserID=@p0", uid);
+    if (user == null)
+    {
+        Json.Write(new { success = false, msg = "该账号不存在" }, Output);
+        return;
+    }
+
+    SQL.Execute("update Users set UserName=@p0,Gender=@p1,Birthday=@p2,Mobile=@p3,RealName=@p5 where UserID=@p4", userName ?? user["UserName"],
+        gender == null ? user["Gender"] : gender == "" ? null : (bool?)req.Bool("Gender"),
+        birthday == null ? user["Birthday"] : req.DateTime("Birthday"),
+        mobile ?? user["Mobile"], uid, realName ?? user["RealName"]);
+
+    Json.Write(new { success = true }, Output);
+    return;
+}

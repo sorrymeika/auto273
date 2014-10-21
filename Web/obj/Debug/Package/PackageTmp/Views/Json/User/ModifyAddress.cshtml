@@ -1,0 +1,39 @@
+﻿@using XX_PhotoPrint.Service
+@using System.Web.Script.Serialization
+@{
+    Layout = null;
+
+    int uid;
+
+    if (!AuthHelper.CheckAuth(out uid))
+    {
+        Json.Write(new { success = false, returnCode = "0000", msg = "授权错误" }, Output);
+        return;
+    }
+
+    var req = new Req();
+    int addressId = req.Int("AddressID", false, "缺少地址编号");
+    int cityId = req.Int("CityID", false, "缺少城市编号");
+    int regionId = req.Int("RegionID", false, "缺少区域编号");
+    string zip = req.String("Zip");
+    string address = req.String("Address", false, "缺少地址");
+    string telPhone = req.String("TelPhone");
+    string mobile = req.String("Mobile", regex: "1\\d{10}", regexText: "手机格式错误");
+    string receiver = req.String("Receiver", false, "缺少收货人");
+
+    if (req.HasError)
+    {
+        Json.Write(new { success = false, msg = req.FirstError, errors = req.GetErrors() }, Output);
+        return;
+    }
+    if (string.IsNullOrEmpty(telPhone) && string.IsNullOrEmpty(mobile))
+    {
+        Json.Write(new { success = false, msg = "手机或固定电话必填一项" }, Output);
+        return;
+    }
+
+    SQL.Execute("update UserAddress set CityID=@p0,RegionID=@p1,Zip=@p2,Address=@p3,TelPhone=@p4,Mobile=@p5,Receiver=@p8 where UserID=@p6 and AddressID=@p7", cityId, regionId, zip, address, telPhone, mobile, uid, addressId, receiver);
+
+    Json.Write(new { success = true }, Output);
+    return;
+}

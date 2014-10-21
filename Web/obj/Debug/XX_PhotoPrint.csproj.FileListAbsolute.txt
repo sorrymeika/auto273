@@ -1,0 +1,7 @@
+G:\Projects\AspNet\PhotoPrint\XX_PhotoPrint\bin\XX_PhotoPrint.dll
+G:\Projects\AspNet\PhotoPrint\XX_PhotoPrint\bin\XX_PhotoPrint.pdb
+G:\Projects\AspNet\PhotoPrint\XX_PhotoPrint\bin\SL.dll
+G:\Projects\AspNet\PhotoPrint\XX_PhotoPrint\bin\SL.pdb
+G:\Projects\AspNet\PhotoPrint\XX_PhotoPrint\obj\Debug\ResolveAssemblyReference.cache
+G:\Projects\AspNet\PhotoPrint\XX_PhotoPrint\obj\Debug\XX_PhotoPrint.dll
+G:\Projects\AspNet\PhotoPrint\XX_PhotoPrint\obj\Debug\XX_PhotoPrint.pdb

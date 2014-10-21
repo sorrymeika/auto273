@@ -1,0 +1,28 @@
+﻿@using XX_PhotoPrint.Service
+@using System.Web.Script.Serialization
+@{
+    Layout = null;
+
+    var js = new JavaScriptSerializer();
+
+    var req = new Req();
+    int categoryId = req.Int("CategoryID");
+    int subId = req.Int("SubID");
+    int page = req.Int("Page", defaultValue: 1);
+    int pageSize = req.Int("PageSize", defaultValue: 10);
+    string keywords = req.String("Keywords");
+    string sort = req.String("Sort");
+    string sortType = req.String("SortType");
+
+    if (req.HasError)
+    {
+        Output.Write(js.Serialize(new { success = false, msg = req.FirstError, errors = req.GetErrors() }));
+        return;
+    }
+
+    int total;
+    var data = ProductService.Search(categoryId, subId, keywords, page, pageSize, sort, sortType, out total);
+
+    Output.Write(js.Serialize(new { success = true, data = data, total = total }));
+    return;
+}

@@ -1,0 +1,22 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <link href="/theme/style.css" rel="Stylesheet" />
+    <!--[if lt IE 9]><link href="/theme/ie.css" rel="Stylesheet" /><![endif]-->
+    <script src="/js/seajs/sea.js"></script>
+    <script>
+        seajs.config({
+            alias: {
+                "jquery": "lib/jquery-1.7.2.min",
+                "$": "lib/jquery-1.7.2.min"
+            }
+        });
+    </script>
+</head>
+<body>
+    @Html.Partial("_Header")
+    @RenderBody()
+    @Html.Partial("_Footer")
+</body>
+</html>

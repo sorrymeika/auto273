@@ -1,0 +1,7 @@
+G:\Projects\XX\Auto273\auto273\Web\bin\XX_PhotoPrint.dll
+G:\Projects\XX\Auto273\auto273\Web\bin\XX_PhotoPrint.pdb
+G:\Projects\XX\Auto273\auto273\Web\obj\Debug\ResolveAssemblyReference.cache
+G:\Projects\XX\Auto273\auto273\Web\obj\Debug\XX_PhotoPrint.dll
+G:\Projects\XX\Auto273\auto273\Web\obj\Debug\XX_PhotoPrint.pdb
+G:\Projects\XX\Auto273\auto273\Web\bin\SL.dll
+G:\Projects\XX\Auto273\auto273\Web\bin\SL.pdb
