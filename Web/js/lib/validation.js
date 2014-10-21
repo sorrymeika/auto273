@@ -12,9 +12,10 @@
         return parent;
     };
 
-    module.exports=function (options) {
-        var defaults={
-            id: "",
+    var Validation=function (input,options) {
+        var me=this;
+
+        options=$.extend({
             left: 0,
             top: 4,
             emptyAble: true,
@@ -25,191 +26,222 @@
             compareText: null,
             validate: null,
             validateText: null,
-            success: null,
             successText: '√',
             position: 'after:this',
             msg: null,
             msgClass: 'msg_tip',
             wrongClass: 'error_tip',
             rightClass: 'right_tip',
-            beforeValidate: null
-        };
-        var validations=[],
-            add=function (option) {
-                option=$.extend({},defaults,option);
-                var selector=option.selector||option.id,
-                    o=typeof selector=="string"?$(selector):selector,
-                    body=document.body,
-                    left=option.left,
-                    topFix=option.top,
-                    position=option.position.split(':'),
-                    where=position[0],
-                    isDock=/^dock/.test(where),
-                    el=(new Function('return '+(position[1]||'this'))).call(o),
-                    compare=option.compare;
+            beforeValidate: null,
+            onValidate: null
+        },options);
 
-                var displayControlParent=$("<span></span>")
-                        .css({
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: 300,
-                            padding: 0,
-                            margin: 0
-                        }),
-                    displayControl=$("<span>").appendTo(displayControlParent).css({
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        display: "none",
-                        "z-index": 1000
-                    }),
-                    show_displayControl=function (s) {
-                        displayControl.show();
+        me._options=options;
 
-                        displayControlParent.appendTo(isDock?el:offsetParent(el));
-                        var pos=o.position();
+        if(typeof input=="string") input=$(input);
 
-                        if('bottom'==where) {
-                            displayControlParent.css({
-                                left: pos.left+left,
-                                top: pos.top+o.outerHeight()+topFix
-                            });
-                        }
-                        else if('dock-bottom'==where) {
-                            displayControlParent.css({
-                                top: '',
-                                left: left,
-                                bottom: 0-topFix
-                            });
-                        } else if('dock-top'==where) {
-                            displayControlParent.css({
-                                top: -1*o.outerHeight()-pos.top,
-                                left: left,
-                                bottom: 0-topFix
-                            });
-                        } else if('top'==where) {
-                            displayControlParent.css({
-                                left: pos.left,
-                                top: pos.top+topFix
-                            });
-                        }
-                        else
-                            displayControlParent.css({
-                                left: pos.left+o.outerWidth()+left,
-                                top: pos.top+topFix
-                            });
-                        return displayControl;
-                    },
-                    showError=function (msg) {
-                        show_displayControl().html(msg||"").removeClass(option.rightClass)
-                            .addClass(option.wrongClass);
-                        o.trigger('validate',[false]);
-                    },
-                    validate=function () {
-                        var v=o.val(),
-                            flag=false,
-                            success=function () {
-                                flag=true;
-                                show_displayControl(1).removeClass(option.wrongClass)
-                                    .addClass(option.rightClass)
-                                    .html(option.successText);
-                                if($.isFunction(option.success)) option.success();
+        var harbor=$("<span></span>").css({
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: 300,
+            padding: 0,
+            margin: 0
+        });
 
-                                o.trigger('validate',[true]);
-                            };
+        options._tip=$("<span></span>").appendTo(harbor).css({
+            position: "absolute",
+            top: 0,
+            left: 0,
+            display: "none",
+            "z-index": 1000
+        });
+        options._input=input;
+        options._harbor=harbor;
 
-                        if((option.emptyAble===false||($.isFunction(option.emptyAble)&&!option.emptyAble()))&&v=="")
-                            showError(option.emptyText);
-                        else if(v!=""&&option.regex!==null&&!option.regex.test(v))
-                            showError(option.regexText);
-                        else if(option.compare&&option.compare.val()!=v)
-                            showError(option.compareText);
-                        else if(option.validate&&!option.validate.call(option,v,function (validateRes) {
-                            if(!validateRes) { showError(option.validationText); }
-                            else success();
-                        })) showError(option.validationText);
-                        else
-                            success();
+        var position=options.position.split(':'),
+            where=position[0],
+            compare=options.compare;
 
-                        return flag;
-                    };
+        options._isDock=/^dock/.test(where);
+        options._dock=(new Function('return '+(position[1]||'this'))).call(input);
+        options._where=where;
 
-                option.validateError=function (msg) {
-                    this.validationText=msg;
-                    showError(msg);
-                };
+        options.onValidate&&input.on('validate',$.proxy(options.onValidate,me));
 
-                validations.push({
-                    el: o,
-                    validate: validate,
-                    showError: function (msg) {
-                        showError(msg);
-                    },
-                    hide: function () {
-                        displayControl.hide();
-                    }
-                });
-
-                if(compare)
-                    compare.on('validate',function (evt,suc) {
-                        if(suc&&o.val()&&this.value!=o.val()) {
-                            showError(option.compareText);
-                        }
-                    });
-
-                o.focus(function () {
-                    if(option.beforeValidate) option.beforeValidate.call(option);
-                    displayControl.hide();
-                    if(option.msg) show_displayControl().html(option.msg)
-                                    .removeClass(option.wrongClass+" "+option.rightClass)
-                                    .addClass(option.msgClass);
-                });
-
-                o.blur(function () {
-                    displayControl.removeClass(option.msgClass).hide();
-                    validate();
-                });
-
-                $(window).bind("unload",function () {
-                    displayControl.remove();
-                })
-            };
-
-        if(options)
-            $.each(options,function (i,option) {
-                add(option);
-            });
-
-        this.validate=function () {
-            var result=true;
-            $.each(validations,function (i,v) {
-                result&=v.validate();
-            });
-            return result||false;
-        };
-
-        this.hideAll=function () {
-            $.each(validations,function (i,v) {
-                v.hide();
-            });
-        };
-
-        this.fire=function (selector,err) {
-            $.each(validations,function (i,v) {
-                if(v.el.selector==selector) {
-                    v.showError(err);
-                    return false;
+        if(compare)
+            compare.on('validate',function (evt,suc) {
+                if(suc&&input.val()&&this.value!=input.val()) {
+                    me.error(options.compareText);
                 }
             });
-        };
 
-        this.clear=function () {
-            validations.length=0;
-        };
-
-        this.add=function (option) {
-            add(option);
-        };
+        if(input[0].tagName.toLowerCase()=="input"&&input[0].type=="file") {
+        } else {
+            input.focus(function () {
+                if(options.beforeValidate) options.beforeValidate.call(me);
+                me.hide();
+                if(options.msg) me.msg(options.msg);
+            })
+            .blur(function () {
+                me.hide().validate();
+            });
+        }
     };
+    Validation.prototype={
+        hide: function () {
+            this._options._tip.hide();
+            return this;
+        },
+        validate: function (callback) {
+            var me=this,
+                opt=me._options,
+                v=opt._input.val(),
+                res=false;
+
+            if((opt.emptyAble===false||($.isFunction(opt.emptyAble)&&!opt.emptyAble()))&&(v==""||v==null))
+                me.error(opt.emptyText);
+            else if(v!=""&&opt.regex!==null&&!opt.regex.test(v))
+                me.error(opt.regexText);
+            else if(opt.compare&&opt.compare.val()!=v)
+                me.error(opt.compareText);
+            else if(opt.validate) {
+                res=opt.validate.call(me,v,function (flag,msg) {
+                    if(!flag) me.error(opt.validationText||msg);
+                    else me.success(opt.successText);
+                    callback&&callback(flag);
+                });
+
+                if(res===true)
+                    me.success(opt.successText);
+                else if(res===false)
+                    me.error(opt.validationText);
+
+            } else
+                res=true,me.success(opt.successText);
+
+            if(res===true||res===false) {
+                callback&&callback(res);
+                return res;
+            }
+        },
+        msg: function (msg) {
+            return this._text(msg);
+        },
+        success: function (msg) {
+            return this._text(msg,true);
+        },
+        error: function (msg) {
+            return this._text(msg,false);
+        },
+        _text: function (msg,type) {
+            var me=this,
+                opt=me._options,
+                tip=opt._tip,
+                harbor=opt._harbor,
+                input=opt._input,
+                where=opt._where,
+                left=opt.left,
+                topFix=opt.top;
+
+            harbor.appendTo(opt._isDock?opt._dock:offsetParent(opt._dock));
+
+            var pos=input.position();
+
+            if('bottom'==where) {
+                displayControlParent.css({
+                    left: pos.left+left,
+                    top: pos.top+input.outerHeight()+topFix
+                });
+            } else if('dock-bottom'==where) {
+                harbor.css({
+                    top: '',
+                    left: left,
+                    bottom: 0-topFix
+                });
+            } else if('dock-top'==where) {
+                harbor.css({
+                    top: -1*input.outerHeight()-pos.top,
+                    left: left,
+                    bottom: 0-topFix
+                });
+            } else if('top'==where) {
+                harbor.css({
+                    left: pos.left,
+                    top: pos.top+topFix
+                });
+            } else
+                harbor.css({
+                    left: pos.left+input.outerWidth()+left,
+                    top: pos.top+topFix
+                });
+
+            tip.html(msg||"").show()
+                .removeClass([opt.rightClass,opt.msgClass,opt.wrongClass].join(' '))
+                .addClass(type===true?opt.rightClass:type===false?opt.wrongClass:opt.msgClass);
+
+            (type===true||type===false)&&input.trigger('validate',[type,msg]);
+
+            return me;
+        }
+    };
+
+    var Validations=function (options) {
+        var me=this;
+
+        me._list=[];
+
+        if(options)
+            $.each(options,function (input,opt) {
+                me.add(input,opt);
+            });
+    };
+
+    Validations.prototype={
+        add: function (input,options) {
+            var valid=options?new Validation(input,options):input;
+
+            this._list.push(valid);
+
+            return this;
+        },
+        items: function () {
+            var list=this._list,
+                args=arguments,
+                items=new Validations();
+
+            $.each($.isArray(args[0])?args[0]:args,function (i,index) {
+                items._list.push(list[index]);
+            });
+
+            return items;
+        },
+        hide: function () {
+            $.each(this._list,function (i,item) {
+                item.hide();
+            });
+            return this;
+        },
+        validate: function (callback) {
+            var list=this._list,
+                length=list.length-1,
+                result=true;
+
+            $.each(list,function (i,item) {
+                item.validate(function (flag) {
+                    result&=flag;
+
+                    length==i&&callback&&callback(result===1);
+                });
+            });
+            return this;
+        },
+        item: function (i) {
+            return this._list[i];
+        }
+    };
+
+    Validations.Single=Validation;
+
+    module.exports=Validations;
 });

@@ -25,6 +25,9 @@
             open: "if($notnull_1){$.each($1a,function($2){with(this){",
             close: "}});}"
         },
+        "break": {
+            open: "return false;"
+        },
         "if": {
             open: "if(($notnull_1) && $1a){",
             close: "}"
@@ -39,16 +42,13 @@
             open: "}else if(($notnull_1) && $1a){"
         },
         "html": {
-            // Unecoded expression evaluation.
             open: "if($notnull_1){__.push($1a);}"
         },
         "=": {
-            // Encoded expression evaluation. Abbreviated form is ${}.
             _default: { $1: "$data" },
             open: "if($notnull_1){__.push($.encode($1a));}"
         },
         "!": {
-            // Comment tag. Skipped by parser
             open: ""
         }
     };
@@ -61,11 +61,6 @@
 
             var tag=tmpl_tag[type],def,expr,exprAutoFnDetect;
             if(!tag) {
-                console.group("Exception");
-                console.error(markup);
-                console.error('Unknown tag: ',type);
-                console.error(all);
-                console.groupEnd("Exception");
                 return "');__.push('";
             }
             def=tag._default||[];
@@ -95,22 +90,14 @@
 
         var depreciated_parse=function () {
             if(tmpl_tag[arguments[2]]) {
-                console.group("Depreciated");
-                console.info(markup);
-                console.info('Markup has old style indicators, use {% %} instead of {{ }}');
-                console.info(arguments[0]);
-                console.groupEnd("Depreciated");
                 return parse_tag.apply(this,arguments);
             } else {
                 return "');__.push('{{"+arguments[2]+"}}');__.push('";
             }
         };
 
-        // Use the variable __ to hold a string array while building the compiled template. (See https://github.com/jquery/jquery-tmpl/issues#issue/10).
-        // Introduce the data as local variables using with(){}
         var parsed_markup_data="var $=$,call,__=[],$data=$item.data; with($data){__.push('";
 
-        // Convert the template into pure JavaScript
         var parsed_markup=$.trim(markup);
         parsed_markup=parsed_markup.replace(regex.sq_escape,"\\$1");
         parsed_markup=parsed_markup.replace(regex.nl_strip," ");
@@ -126,7 +113,6 @@
 
     $.extend({
         encode: function (text) {
-            // Do HTML encoding replacing < > & and ' and " by corresponding entities.
             return (""+text).split("<").join("&lt;").split(">").join("&gt;").split('"').join("&#34;").split("'").join("&#39;");
         }
     });

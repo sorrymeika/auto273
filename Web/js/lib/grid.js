@@ -46,7 +46,8 @@
                     columns: [],
                     children: null,
                     ajaxSettings: {},
-                    search: null
+                    search: null,
+                    height: 'auto'
                 },options),
                 columnsOpt=settings.columns;
 
@@ -275,7 +276,7 @@
 
                         $.each(settings.children,function (ci,childOpt) {
                             if(typeof childOpt.render==="function") {
-                                childOpt.render(childContainer,item,row);
+                                row.children.push(childOpt.render(childContainer,item,row));
                             } else {
                                 if(settings.subKey)
                                     childOpt.data=item[settings.subKey];
@@ -298,29 +299,34 @@
                             css['float']='none';
                         var cellEl=$("<li class='gridCell'></li>").css(css),
                             cellContent=cellEl,
-	                        val=column.bind?(item[column.bind]||(item[column.bind]===0?0:column.defaultVal)):"",
-	                        cell={
-	                            data: val,
-	                            row: row,
-	                            append: function (a) {
-	                                cellContent.append(a);
-	                            },
-	                            html: function (a) {
-	                                if(typeof a==="undefined")
-	                                    return cellContent.html();
-	                                cellContent.html(a);
-	                            },
-	                            val: function (a) {
-	                                if(typeof a=="undefined")
-	                                    return val;
+                            val=column.bind?(item[column.bind]||(item[column.bind]===0?0:column.defaultVal)):"",
+                            cell={
+                                data: val,
+                                row: row,
+                                append: function (a) {
+                                    cellContent.append(a);
+                                },
+                                html: function (a) {
+                                    if(typeof a==="undefined")
+                                        return cellContent.html();
+                                    cellContent.html(a);
+                                },
+                                val: function (a) {
+                                    if(typeof a=="undefined")
+                                        return val;
 
-	                                row.data[column.bind]=val=a;
-	                                if(typeof cell.onChange=="function") cell.onChange(a);
-	                            },
-	                            find: function (a) {
-	                                return cellEl.find(a);
-	                            }
-	                        };
+                                    row.data[column.bind]=val=a;
+                                    if(typeof cell.onChange=="function") cell.onChange(a);
+                                },
+                                find: function (a) {
+                                    return cellEl.find(a);
+                                }
+                            };
+
+                        if(typeof val=="string"&&/^\/Date\(\d+\)\/$/.test(val)) {
+                            val=util.formatDate(val);
+                        }
+
                         row.cells.push(cell);
                         if(j==0) {
                             if(settings.type=="tree") {
@@ -462,12 +468,15 @@
                             settings.data=$.extend([],res.data);
                             loadData();
 
-                            if(settings.pageEnabled)
+                            if(settings.pageEnabled) {
                                 settings.page.change({
                                     page: ajaxData.page,
                                     pageSize: ajaxData.pageSize,
                                     total: res.total
                                 });
+                                settings.onPageChange&&settings.onPageChange(ajaxData.page);
+                            }
+
                             if(ajaxSettings.success) ajaxSettings.success.call(me,res.data);
                         } else
                             showMsg(res.msg);
@@ -490,27 +499,56 @@
                     searchControls={},
                     searchData=searchOpt.data;
 
-                if(searchData)
+                if(searchData) {
                     $.each(searchData,function (controlName,controlOpt) {
-                        if($.isPlainObject(controlOpt))
+                        if($.isPlainObject(controlOpt)) {
                             searchControls[controlName]=controlOpt;
+                            searchData[controlName]="";
+                        }
                     });
+                }
 
                 me._search=function () {
-                    searchData=searchOpt.data||(searchOpt.data={});
+                    settings.ajaxSettings=$.extend(true,{},searchOpt,settings.ajaxSettings);
+                    var ajaxSettings=settings.ajaxSettings;
+
+                    searchData=ajaxSettings.data||(ajaxSettings.data={});
+                    if(settings.pageEnabled) searchData.page=1;
+
+                    if(ajaxSettings.beforeSend) ajaxSettings.beforeSend.call(me,searchData);
+                    delete ajaxSettings.beforeSend;
+
                     $.each(controls,function (j,item) {
                         searchData[item.name]=item.control.val();
                     });
-                    me.load(searchOpt);
+
+                    me._load();
+                };
+
+                me.searchCurrentPage=function () {
+                    settings.ajaxSettings=$.extend(true,{},searchOpt,settings.ajaxSettings);
+                    var ajaxSettings=settings.ajaxSettings;
+
+                    searchData=ajaxSettings.data||(ajaxSettings.data={});
+
+                    if(ajaxSettings.beforeSend) ajaxSettings.beforeSend.call(me);
+                    delete ajaxSettings.beforeSend;
+
+                    $.each(controls,function (j,item) {
+                        searchData[item.name]=item.control.val();
+                    });
+
+                    me._load();
                 };
 
                 if(searchControls&&!$.isEmptyObject(searchControls)) {
 
-                    var searchEl=$('<div class="search"></div>').appendTo(container);
-
+                    var searchEl=$('<div class="search"></div>').appendTo(container),
+                        searchVisible=false;
                     me._searchEl=searchEl;
 
                     $.each(searchControls,function (j,inputopt) {
+
                         var opt=$.extend({
                             label: '',
                             name: ''||j,
@@ -518,25 +556,30 @@
                             value: '',
                             render: null,
                             width: null,
-                            options: null
+                            options: null,
+                            newLine: false
                         },inputopt);
+
+                        if(inputopt.newLine) {
+                            searchEl.append('<br>')
+                        }
 
                         opt.label&&$('<i>'+opt.label+'</i>').appendTo(searchEl)||searchEl.append(' ');
 
-                        var name=opt.name;
+                        var name=opt.name,
+                            control={
+                                name: name,
+                                type: opt.type
+                            };
 
                         if($.isFunction(opt.render)) {
                             var input=opt.render.call(me,searchEl);
                             if(typeof input=="string")
                                 searchEl.append(input);
-                            controls.push({
-                                type: 'render',
-                                name: name,
-                                control: searchEl.find('[name="'+name+'"]')
-                            });
-                        }
-                        else {
-                            var control={ name: name,type: opt.type };
+
+                            control.type='render';
+                            control.control=earchEl.find('[name="'+name+'"]');
+                        } else {
 
                             if(opt.type=="calendar") {
                                 input=$('<input name="'+name+'" class="text" type="text"/>');
@@ -554,23 +597,30 @@
                                         });
                                     });
                                 }
+                                if(opt.change) input.change(opt.change);
                             } else {
                                 input=$('<input type="'+opt.type+'" name="'+name+'" class="text"/>');
                             }
                             input.appendTo(searchEl).val(opt.value);
 
                             control.control=input;
-                            controls.push(control);
 
                             if(opt.width) input.css({ width: width });
                         }
+                        controls.push(control);
+
+                        if(control.type!='hidden')
+                            searchVisible=true;
                     });
 
                     delete searchOpt.controls;
 
-                    me._searchBtn=$('<button class="button">搜索</button>')
+                    if(searchVisible) {
+                        me._searchBtn=$('<button class="button">搜索</button>')
                         .appendTo(searchEl)
                         .click($.proxy(me._search,me));
+                    } else
+                        searchEl.hide();
                 }
             }
             container.append(tpl);
@@ -623,7 +673,7 @@
             settings.data=$.extend([],data);
             me._loadData();
         },
-        load: function (url,data,fn) {
+        prepareAjax: function (url,data,fn) {
             var me=this,
                 args=arguments,
                 i=0,
@@ -642,6 +692,12 @@
             var settings=me._settings;
             ajaxSettings.data=$.extend(settings.pageEnabled?{ page: 1,pageSize: 10}:{},ajaxSettings.data);
             settings.ajaxSettings=ajaxSettings;
+
+            return me;
+        },
+        load: function () {
+            var me=this;
+            if(arguments.length) me.prepareAjax.apply(me,arguments);
             me._load();
         }
     };

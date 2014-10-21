@@ -7,7 +7,7 @@ a:hover { color: #c00; }
 table { border-collapse: collapse; border-spacing: 0; }
 h1, h2, h3, h4, h5, h6 { font-size: 100%; }
 ul, ol, li { list-style: none; }
-input.text, input.text_short, input.text_normal, input.text_price, select, input.text_number, textarea.text { border: 1px solid #ccc; height: 20px; width: 150px; -webkit-box-shadow: #f1f1f1 0 1px 1px; }
+input.text, input.text_short, input.text_normal, input.text_price, select, input.text_number, textarea.text { border: 1px solid #ccc; height: 20px; width: 150px; -webkit-box-shadow: #f1f1f1 0 1px 1px; font-family: 微软雅黑,宋体,arial; }
 textarea.text { height: 40px; width: 300px; padding: 0 4px; }
 input.text_short { width: 60px; padding: 0 4px; }
 input.text_normal { width: 150px; padding: 0 4px; }
@@ -34,14 +34,14 @@ h1 { border-bottom: 1px solid #ddd; font-size: 18pt; margin-bottom: 20px; paddin
 .button-center { float: right; padding: 0px; -webkit-border-radius: 0; -moz-border-radius: 0; border-radius: 0; border-right-width: 0px; }
 .search { overflow: hidden; padding-bottom: 10px; }
 .search select { width: 100px; }
-.search * { vertical-align: middle; }
-.search i { display: inline-block; padding-left: 10px; }
+.search * { vertical-align: middle;margin-bottom: 5px; }
+.search i { display: inline-block; padding-left: 10px;  }
 .form { margin: 25px 20px; }
 .form td, .form th { padding: 12px 6px; vertical-align: top; font-size: 14px; color: #333; font-weight: normal; }
 .form th i { color: #c00; padding: 0px 0px 0px 6px; }
 .form th { text-align: right; vertical-align: middle; }
 .form th.vtop { vertical-align: top; }
-.form input.text,.form input.text_normal, .form input.text_price, .form input.text_number { width: 300px; height: 24px; padding: 0 4px; line-height: 24px; }
+.form input.text, .form input.text_normal, .form input.text_price, .form input.text_number { width: 300px; height: 24px; padding: 0 4px; line-height: 24px; }
 .form input.text_price { width: 90px; }
 .form input.text_number { width: 90px; }
 .form input.text_normal { width: 150px; }
@@ -84,7 +84,7 @@ h1 { border-bottom: 1px solid #ddd; font-size: 18pt; margin-bottom: 20px; paddin
 .ico-modify { display: inline-block; width: 12px; height: 12px; background: url(images/icons.png) no-repeat -66px -116px; vertical-align: middle; margin-right: 2px; }
 .ico-view { display: inline-block; width: 12px; height: 12px; background: url(images/icons.png) no-repeat -113px -116px; vertical-align: middle; margin-right: 2px; }
 
-.grid { border-top: 1px solid #cdcdcd; background: #fff url(images/gridTh_bg.png) repeat-x; margin: 0px auto 0px auto; overflow: hidden; height: auto; width: 100%; }
+.grid { font-size: 12px; border-top: 1px solid #cdcdcd; background: #fff url(images/gridTh_bg.png) repeat-x; margin: 0px auto 0px auto; overflow: hidden; height: auto; width: 100%; border-collapse: collapse; }
 .grid div { clear: both; }
 .gridBorderR { background: url(images/point.png) repeat-y right 0px; }
 .gridBody { width: 100%; background: url(images/point.png) repeat-y left 0px; overflow: hidden; }
@@ -93,12 +93,12 @@ h1 { border-bottom: 1px solid #ddd; font-size: 18pt; margin-bottom: 20px; paddin
 .gridHeader .sortable { background: url(images/sort_both.png) no-repeat right 0px; margin: 0px 1px; }
 .gridHeader .sortable.sort_asc { background: url(images/sort_asc.png) no-repeat right 0px; margin: 0px 1px; }
 .gridHeader .sortable.sort_desc { background: url(images/sort_desc.png) no-repeat right 0px; margin: 0px 1px; }
-.gridHeader li { overflow: hidden; height: 25px; float: left; text-align: left; background: url(images/point.png) repeat-y left 0px; }
+.gridHeader li { overflow: hidden; height: 25px; text-align: left; float: left; background: url(images/point.png) repeat-y left 0px; }
 .gridHeader a { height: 27px; cursor: default; display: block; padding: 0px 6px; }
 .gridHeader a:hover { color: #445055; text-decoration: none; }
 .gridNumber { background: #f1f1f1; text-indent: 5px; border-top: 1px solid #fff; float: left; }
 .gridRow { overflow: hidden; border-bottom: 1px solid #ddd; background: #fff url(images/point.png) repeat-y right 0px; line-height: 14px; clear: both; float: left; width: 100%; margin: 0; }
-.gridCell { overflow: hidden; float: left; text-align: center; background: url(images/point.png) repeat-y left 0px; line-height: 20px; text-indent: 5px; }
+.gridCell { float: left; overflow: hidden; text-align: center; background: url(images/point.png) repeat-y left 0px; line-height: 20px; overflow: hidden; }
 .gridTreeSpace, .gridTree, .gridTreeNoChildren { height: 100%; vertical-align: middle; cursor: default; line-height: 20px; text-align: center; height: 100%; width: 18px; height: 20px; float: left; font-weight: bold; font-family: Arial; overflow: hidden; }
 .gridTreeSpace { width: 14px; }
 .gridTreePlus .gridTree { background: url(images/btnPlus.png) no-repeat center center; }
@@ -149,6 +149,12 @@ h1 { border-bottom: 1px solid #ddd; font-size: 18pt; margin-bottom: 20px; paddin
 .dialog { border: 1px solid #ddd; background: #fff; position: absolute; }
 .dialog_hd { font-weight: bold; border-bottom: 1px solid #ddd; background: #f1f1f1; padding: 0 10px; height: 25px; line-height: 25px; cursor: move; -moz-user-select: none; -webkit-user-select: none; }
 .dialog_close { float: right; cursor: pointer; margin: 0 0 0 10px; color: #666; font-family: Arial, Verdana; }
-.dialog_bd { padding: 10px; }
+.dialog_content { padding: 10px; }
 .dialog_fixed { position: fixed; _position: absolute; _left: expression(document.documentElement.scrollLeft+(document.documentElement.clientWidth-this.offsetWidth)/2); _top: expression(document.documentElement.scrollTop+(document.documentElement.clientHeight-this.offsetHeight)/2); zoom: 1; }
 .dialog .action { text-align: right; margin-right: 20px; margin-bottom: 20px; }
+.dialog .form { margin-top: 10px; margin-bottom: 15px; }
+.dialog .form td { padding: 12px 0; }
+
+.tab { margin: 0px 0 15px 0; border-bottom: 1px solid #ddd; }
+.tab a { padding: 6px 15px; background: #ddd; color: #666; display: inline-block; margin: 0px 5px 5px 5px; }
+.tab a.curr { background: #64a0de; color: #fff; }

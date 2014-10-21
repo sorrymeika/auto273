@@ -5,7 +5,8 @@
         tmpl=require('lib/tmpl'),
         isIE6=util.isIE6,
         win=$(window),
-        doc=$(document);
+        doc=$(document),
+        easing=require('lib/easing');
 
     var maskTmpl='<div class="J_Mask" style="opacity:.3;filter:alpha(opacity=30);position:absolute;z-index:99;top:0px;left:0px;background:#000;"></div>';
 
@@ -40,6 +41,8 @@
         },
         hide: function () {
             var me=this;
+            if(me._visible==false) return;
+
             me._mask&&me._mask.hide();
             win.off('resize',me.resize);
             me._visible=false;
@@ -71,31 +74,134 @@
                     width: width
                 }).appendTo(document.body),
                 title=container.find('.dialog_hd').append('<span>'+options.title+'</span>'),
-                content=container.find('.dialog_bd');
+                body=container.find('.dialog_bd'),
+                content=$('<div class="dialog_content"></div>').appendTo(body);
 
             container.addClass('dialog_fixed');
             drag(title,container);
 
             content.append(options.content).children().show();
-            title.find('.dialog_close').click(function () { me.hide(); });
+            title.find('.dialog_close').click(function () {
+                if(options.onCloseClick&&options.onCloseClick.call(me)===false) return;
+                me.hide();
+            });
 
             me._title=title.find('span');
             me.container=container;
             me._content=content;
+            me._body=body;
 
             options.height&&content.css({ overflowY: 'auto',height: options.height });
 
             onContentLoad=options.onContentLoad;
             if(onContentLoad) onContentLoad.call(this);
         },
+        translate: function (dialog) {
+            var me=this,
+                container=me.container,
+                content=me._content,
+                body=me._body,
+                m_width=parseInt(container.css('width')),
+                m_height=parseInt(container.css('height')),
+                d_container=dialog.container.css({ visibility: 'hidden',display: 'block' }),
+                d_content=dialog.content(),
+                d_width=parseInt(d_container.css('width')),
+                d_height=parseInt(d_container.css('height')),
+                d_left=(win.width()-d_width)/2,
+                d_top=(win.height()-d_height)/2;
+
+            content.css({
+                width: content.css('width'),
+                'float': 'left'
+            })
+
+            d_content.css({
+                width: d_content.css('width'),
+                'float': 'left'
+            });
+
+            var isPrev=me._translatePopup==dialog,
+                marginStart,
+                marginEnd,
+                appendFunc;
+
+            if(isPrev) {
+                marginStart=m_width* -1;
+                marginEnd=0;
+                appendFunc='prepend';
+            } else {
+                marginStart=0;
+                marginEnd=m_width* -1;
+                appendFunc='append';
+                dialog._translatePopup=me;
+            }
+            me._translatePopup=null;
+
+            body.css({
+                width: d_width+m_width,
+                'margin-left': marginStart
+            })[appendFunc](d_content);
+
+            container
+                .css({
+                    overflow: 'hidden',
+                    height: m_height
+                })
+                .animate({
+                    left: d_left,
+                    top: d_top,
+                    width: d_width,
+                    height: d_height
+                },{
+                    duration: 300,
+                    easing: 'easeOutQuad',
+                    step: function (now,fx) {
+                        if(fx.prop=='left') {
+                            body.css({
+                                'margin-left': (new Date().getTime()-fx.startTime)/300*(marginEnd-marginStart)+marginStart
+                            })
+                        }
+                    },
+                    complete: function () {
+                        d_content.css({
+                            width: '',
+                            'float': ''
+                        }).appendTo(dialog._body);
+
+                        d_container.css({
+                            left: d_left,
+                            top: d_top,
+                            visibility: ''
+                        });
+                        dialog._visible=true;
+
+                        container.css({
+                            width: m_width,
+                            height: '',
+                            overflow: '',
+                            display: 'none'
+                        });
+                        me._visible=false;
+
+                        content.css({
+                            width: '',
+                            'float': ''
+                        });
+                        body.css({ width: '',marginLeft: '' });
+                    }
+                });
+        },
         find: function (selector) {
             return this._content.find(selector);
         },
         content: function (content) {
             var me=this;
-            me._content.html('').append(content);
+            if(typeof content!=='undefined') {
+                me._content.html('').append(content);
+                return me;
+            }
 
-            return me;
+            return me._content;
         },
         center: function () {
             var me=this;
@@ -114,38 +220,53 @@
             }
             return me;
         },
+        _visible: false,
         show: function () {
             var me=this,
                 container=this.container;
 
-            win.on('resize',$.proxy(me.center,me));
+            if(!me._visible) {
+                me._visible=true;
 
-            Mask.show();
-            container.css({
-                top: -9999,
-                left: -9999,
-                display: 'block',
-                opacity: 0
-            }).css({
-                left: (win.width()-container.outerWidth())/2,
-                top: win.height()/2-container.height()
-            });
+                win.on('resize',$.proxy(me.center,me));
 
-            me.center();
+                Mask.show();
+                container.css({
+                    top: -9999,
+                    left: -9999,
+                    display: 'block',
+                    opacity: 0
+                }).css({
+                    left: (win.width()-container.outerWidth())/2,
+                    top: win.height()/2-container.height()
+                });
+
+                me.center();
+            }
 
             return me;
         },
         hide: function () {
             var me=this;
 
-            win.off('resize',me.center);
-            me.container.fadeOut(200);
-            Mask.hide();
+            if(me._visible) {
+                me._visible=false;
+
+                win.off('resize',me.center);
+                me.container.fadeOut(200);
+
+                $('body > .dialog:visible').length<=1&&Mask.hide();
+            }
 
             return me;
         },
         title: function (title) {
-            this._title.html(title);
+            if(typeof title!='undefined') {
+                this._title.html(title);
+                return this;
+            }
+
+            return this._title.html();
         }
     };
 

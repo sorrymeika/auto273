@@ -1,70 +1,139 @@
 ﻿define(function (require,exports,module) {
     var $=require('jquery');
 
-    var defaults={
-        text: "",
-        ico: null,//delete,add,modify,view
-        disabled: false,
-        handle: function () { }
+    var Button=function (container,options) {
+        options=$.extend({
+            text: "",
+            ico: null,//delete,add,modify,view
+            disabled: false,
+            visible: true,
+            click: null
+        },options);
+
+        var me=this,
+			clickEvents=[],
+			value=options.text||options.value;
+
+        me._clickEvents=clickEvents;
+
+        options.click&&clickEvents.push(options.click);
+
+        var button=$("<a class='button'>"+(options.ico?'<em class="ico-'+options.ico+'"></em>':'')+value+"</a>")
+			.appendTo(container)
+			.click(function () {
+			    if(me._disabled) {
+			        return;
+			    }
+			    $.each(clickEvents,function (i,click) {
+			        click.call(me);
+			    });
+			});
+
+        (!options.visible)&&button.hide();
+
+        me._button=button;
+
+        if(options.disabled)
+            me.disable();
+        else
+            me.enable();
     };
 
-    function Buttons(container,options) {
+    Button.prototype={
+        disabled: function () {
+            return this._disabled;
+        },
+        disable: function () {
+            this._disabled=true;
+            this._button.addClass("disabled");
+            return this;
+        },
+        enable: function () {
+            this._disabled=false;
+            this._button.removeClass("disabled");
+            return this;
+        },
+        click: function (fn) {
+            if(!arguments.length)
+                this._button.tigger('click');
 
-        var container=this.container=$(container),
-            buttons=this.buttons=[];
+            this._clickEvents.push(fn);
+        },
+        off: function (fn) {
+            var clickEvents=this._clickEvents;
+            for(var i=clickEvents.length-1;i>=0;i--) {
+                (!fn||clickEvents[i]===fn)&&clickEvents.splice(i,1);
+            }
+        },
+        val: function (text) {
+            var button=this._button;
+            button.contents().last().remove();
+            button.append(text);
+        }
+    };
 
-        $.each(options,function (i,item) {
-            item=$.extend({},defaults,item);
+    var Buttons=function (container,options) {
+        var me=this,
+			buttons=[];
 
-            var button=$("<a class='button'>"+item.text+"</a>")
-                .appendTo(container)
-                .click(function () {
-                    if(button.disabled) {
-                        return;
-                    }
-                    item.handle.call(this);
-                });
-            button.disable=function () {
-                this.disabled=true;
-                this.addClass("disabled");
-                return this;
-            };
-            button.enable=function () {
-                this.disabled=false;
-                this.removeClass("disabled");
-                return this;
-            };
-            if(item.ico)
-                button.contents().first().before("<em class='ico-"+item.ico+"'></em>");
+        if(typeof container=="string")
+            container=$(container);
 
-            if(item.disabled)
-                button.disable();
-            else
-                button.enable();
+        me._container=container;
+        me._buttons=[];
 
-            buttons.push(button);
-        });
+        options&&me.add(options);
     };
 
     Buttons.prototype={
-        eq: function (i) {
+        add: function (options) {
+
+            var me=this;
+            if($.isArray(options))
+                $.each(options,function (i,opt) {
+
+                    me.add(opt);
+                });
+            else
+                me._buttons.push(new Button(me._container,options));
+
+            return this;
+        },
+        items: function () {
+            var buttons=this._buttons,
+				args=arguments,
+				items=new Buttons(this._container);
+
+            $.each($.isArray(args[0])?args[0]:args,function (i,index) {
+                items._buttons.push(buttons[index]);
+            });
+
+            return items;
+        },
+        item: function (i) {
             return buttons[i];
         },
         disable: function () {
-            var buttons=this.buttons;
+            var buttons=this._buttons;
 
-            $.each($.isArray(arguments[0])?arguments[0]:arguments,function (i,index) {
-                buttons[index].disable();
+            $.each(this._buttons,function (i,button) {
+                button.disable();
             });
+
+            return this;
         },
         enable: function () {
-            var buttons=this.buttons;
+            var buttons=this._buttons;
 
-            $.each($.isArray(arguments[0])?arguments[0]:arguments,function (i,index) {
-                buttons[index].enable();
+            $.each(this._buttons,function (i,button) {
+                button.enable();
             });
+
+            return this;
         }
     }
+
+    Buttons.Single=Button;
 
     module.exports=Buttons;
 });
