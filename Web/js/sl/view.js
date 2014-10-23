@@ -2,12 +2,13 @@
 
     var $=require('$'),
         sl=require('./base'),
-        tmpl=require('./tmpl');
+        tmpl=require('./tmpl'),
+        slice=Array.prototype.slice;
 
     var View=sl.Class.extend(function() {
         var that=this,
             options,
-            args=Array.prototype.slice.call(arguments),
+            args=slice.call(arguments),
             selector=args.shift();
 
         if(typeof selector!=='undefined'&&!$.isPlainObject(selector)) {
@@ -158,6 +159,7 @@
                 $.each(that._bindAttrs,function(i,attrs) {
                     $.fn.unbind.apply($el,attrs);
                 });
+                that.$el.remove();
             });
 
             that.trigger('Destory');
@@ -169,7 +171,7 @@
 
         childClass=sl.Class.extend.call(that,childClass,prop);
 
-        childClass.events=$.extend({},childClass.fn.superClass.events,childClass.prototype.events);
+        childClass.events=$.extend({},childClass.superClass.events,childClass.prototype.events);
 
         childClass.extend=arguments.callee;
         childClass.plugin=function(plugin) {

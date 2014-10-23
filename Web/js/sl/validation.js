@@ -3,7 +3,7 @@
 
     var offsetParent=function (el) {
         var parent=el.parent(),
-            position;
+			position;
         while(parent.length!=0&&parent[0].tagName.toLowerCase()!="body") {
             if($.inArray(parent.css('position'),['fixed','absolute','relative']))
                 return parent;
@@ -61,8 +61,8 @@
         options._harbor=harbor;
 
         var position=options.position.split(':'),
-            where=position[0],
-            compare=options.compare;
+			where=position[0],
+			compare=options.compare;
 
         options._isDock=/^dock/.test(where);
         options._dock=(new Function('return '+(position[1]||'this'))).call(input);
@@ -84,9 +84,9 @@
                 me.hide();
                 if(options.msg) me.msg(options.msg);
             })
-            .blur(function () {
-                me.hide().validate();
-            });
+			.blur(function () {
+			    me.hide().validate();
+			});
         }
     };
     Validation.prototype={
@@ -96,9 +96,9 @@
         },
         validate: function (callback) {
             var me=this,
-                opt=me._options,
-                v=opt._input.val(),
-                res=false,
+				opt=me._options,
+				v=opt._input.val(),
+				res=false,
                 dfd={
                     reject: function (msg) {
                         me.error(opt.validationText||msg);
@@ -189,8 +189,8 @@
                 });
 
             tip.html(msg||"").show()
-                .removeClass([opt.rightClass,opt.msgClass,opt.wrongClass].join(' '))
-                .addClass(type===true?opt.rightClass:type===false?opt.wrongClass:opt.msgClass);
+				.removeClass([opt.rightClass,opt.msgClass,opt.wrongClass].join(' '))
+				.addClass(type===true?opt.rightClass:type===false?opt.wrongClass:opt.msgClass);
 
             (type===true||type===false)&&input.trigger('validate',[type,msg]);
 
