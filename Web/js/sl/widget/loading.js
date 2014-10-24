@@ -13,7 +13,6 @@
             }
         },
         options: {
-            keys: null,
             check: null
         },
 
