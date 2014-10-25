@@ -6,7 +6,7 @@ using System.Net.Mail;
 using SL.Util;
 using SL.Data;
 
-namespace Web.Service
+namespace SL.Web.Service
 {
     public class UserService
     {

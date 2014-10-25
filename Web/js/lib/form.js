@@ -141,7 +141,7 @@
                         input=$('<select name="'+name+'"></select>');
 
                         var addOption=function (text,value) {
-                            if(!value) {
+                            if(typeof value==='undefined') {
                                 if($.isArray(text))
                                     $.each(text,function (j,selopt) {
                                         addOption(selopt);
@@ -165,6 +165,23 @@
                     opt.height&&input.css({ height: opt.height });
                 }
             }
+        }
+
+        if(opt.events) {
+            $.each(opt.events,function (evt,f) {
+                var arr=evt.split(' '),
+                    events=arr.shift();
+
+                events=events.replace(/,/g,' ');
+
+                f=$.isFunction(f)?f:opt[f];
+
+                if(arr.length>0&&arr[0]!=='') {
+                    input.delegate(arr.join(' '),events,$.proxy(f,me));
+                } else {
+                    input.bind(events,$.proxy(f,me));
+                }
+            });
         }
 
         me._input=input.attr('control-name',name);

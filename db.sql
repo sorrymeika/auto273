@@ -18,10 +18,13 @@ AccountID int identity primary key,
 AccountName varchar(20),
 ShopID int,
 Name varchar(20),
+--0:商户;1:业务员 
 Role int,
 Password varchar(32),
 Deleted bit default 0
 )
+alter table Account add Auth varchar(200)
+alter table Account add LatestLoginTime datetime
 
 create table [Transfer] (
 TransferID int identity primary key,

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Alipay.Class;
-using Web.Service;
+using SL.Web.Service;
 using System.IO;
 using System.Globalization;
 using System.Web.Script.Serialization;
@@ -12,7 +12,7 @@ using System.Drawing;
 using SL.Util;
 using System.Collections.Specialized;
 
-namespace Web.Controllers
+namespace SL.Web.Controllers
 {
     public class CoreController : Controller
     {

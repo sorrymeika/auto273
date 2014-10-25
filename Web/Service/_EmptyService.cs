@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Web.Service
+namespace SL.Web.Service
 {
     public class _EmptyService
     {

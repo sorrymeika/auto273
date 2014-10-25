@@ -10,8 +10,8 @@
     <ProjectTypeGuids>{E53F8FEA-EAE0-44A6-8774-FFD645390401};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>XX_PhotoPrint</RootNamespace>
-    <AssemblyName>XX_PhotoPrint</AssemblyName>
+    <RootNamespace>SL.Web</RootNamespace>
+    <AssemblyName>SL.Web</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
@@ -74,6 +74,106 @@
     <Compile Include="Service\UserService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="assets\anim.css" />
+    <Content Include="assets\images\dataloading.png" />
+    <Content Include="assets\images\imgbg.png" />
+    <Content Include="assets\images\launch.png" />
+    <Content Include="assets\images\login.png" />
+    <Content Include="assets\images\menu_hd.png" />
+    <Content Include="assets\images\site.png" />
+    <Content Include="assets\index.html" />
+    <Content Include="assets\js\app.js" />
+    <Content Include="assets\js\core\event.js" />
+    <Content Include="assets\js\core\sl.js" />
+    <Content Include="assets\js\core\widget.js" />
+    <Content Include="assets\js\extend\highlight.js" />
+    <Content Include="assets\js\extend\iscroll.js" />
+    <Content Include="assets\js\extend\matchMedia.js" />
+    <Content Include="assets\js\extend\ortchange.js" />
+    <Content Include="assets\js\extend\parseTpl.js" />
+    <Content Include="assets\js\extend\scrollStop.js" />
+    <Content Include="assets\js\extend\throttle.js" />
+    <Content Include="assets\js\seajs\sea.js" />
+    <Content Include="assets\js\sl\base.js" />
+    <Content Include="assets\js\sl\plugins\template.js" />
+    <Content Include="assets\js\sl\sl.js" />
+    <Content Include="assets\js\sl\style.js" />
+    <Content Include="assets\js\sl\tmpl.js" />
+    <Content Include="assets\js\sl\validation.js" />
+    <Content Include="assets\js\sl\view.js" />
+    <Content Include="assets\js\sl\widget\loading.js" />
+    <Content Include="assets\js\sl\widget\waterfall.js" />
+    <Content Include="assets\js\tmpl.js" />
+    <Content Include="assets\js\ui\animation.js" />
+    <Content Include="assets\js\ui\dialog.js" />
+    <Content Include="assets\js\ui\dotslider.js" />
+    <Content Include="assets\js\ui\dropdown.js" />
+    <Content Include="assets\js\ui\event.js" />
+    <Content Include="assets\js\ui\imglazyload.js" />
+    <Content Include="assets\js\ui\loading.js" />
+    <Content Include="assets\js\ui\sl.app.js" />
+    <Content Include="assets\js\ui\sl.js" />
+    <Content Include="assets\js\ui\sl.web.js" />
+    <Content Include="assets\js\ui\slider.js" />
+    <Content Include="assets\js\ui\style.js" />
+    <Content Include="assets\js\ui\tabs.js" />
+    <Content Include="assets\js\util.js" />
+    <Content Include="assets\js\util\base64.js" />
+    <Content Include="assets\js\util\md5.js" />
+    <Content Include="assets\js\views\3dBuy.js" />
+    <Content Include="assets\js\views\about.js" />
+    <Content Include="assets\js\views\allTypes.js" />
+    <Content Include="assets\js\views\buy.js" />
+    <Content Include="assets\js\views\cart.js" />
+    <Content Include="assets\js\views\credit.js" />
+    <Content Include="assets\js\views\credits.js" />
+    <Content Include="assets\js\views\east61.js" />
+    <Content Include="assets\js\views\east61Buy.js" />
+    <Content Include="assets\js\views\f15c5.js" />
+    <Content Include="assets\js\views\f15c5Buy.js" />
+    <Content Include="assets\js\views\index.js" />
+    <Content Include="assets\js\views\k3.js" />
+    <Content Include="assets\js\views\k3Buy.js" />
+    <Content Include="assets\js\views\loading.js" />
+    <Content Include="assets\js\views\login.js" />
+    <Content Include="assets\js\views\menu.js" />
+    <Content Include="assets\js\views\news.js" />
+    <Content Include="assets\js\views\order.js" />
+    <Content Include="assets\js\views\prize.js" />
+    <Content Include="assets\js\views\prizeList.js" />
+    <Content Include="assets\js\views\prizeSubList.js" />
+    <Content Include="assets\js\views\qlc.js" />
+    <Content Include="assets\js\views\qlcBuy.js" />
+    <Content Include="assets\js\views\selector.js" />
+    <Content Include="assets\js\views\ssq.js" />
+    <Content Include="assets\js\views\ssqBuy.js" />
+    <Content Include="assets\js\views\support.js" />
+    <Content Include="assets\js\views\user.js" />
+    <Content Include="assets\js\zepto.js" />
+    <Content Include="assets\style.css" />
+    <Content Include="assets\views\3d.html" />
+    <Content Include="assets\views\about.html" />
+    <Content Include="assets\views\buy.html" />
+    <Content Include="assets\views\cart.html" />
+    <Content Include="assets\views\credit.html" />
+    <Content Include="assets\views\credits.html" />
+    <Content Include="assets\views\east61.html" />
+    <Content Include="assets\views\f15c5.html" />
+    <Content Include="assets\views\home.html" />
+    <Content Include="assets\views\index.html" />
+    <Content Include="assets\views\k3.html" />
+    <Content Include="assets\views\login.html" />
+    <Content Include="assets\views\menu.html" />
+    <Content Include="assets\views\news.html" />
+    <Content Include="assets\views\order.html" />
+    <Content Include="assets\views\prize.html" />
+    <Content Include="assets\views\prizeList.html" />
+    <Content Include="assets\views\prizeSubList.html" />
+    <Content Include="assets\views\qlc.html" />
+    <Content Include="assets\views\selector.html" />
+    <Content Include="assets\views\ssq.html" />
+    <Content Include="assets\views\support.html" />
+    <Content Include="assets\views\user.html" />
     <Content Include="Global.asax" />
     <Content Include="js\colorpicker\colorpicker.css" />
     <Content Include="js\colorpicker\colorpicker.js" />
@@ -82,6 +182,11 @@
     <Content Include="js\colorpicker\wheel.png" />
     <Content Include="js\extentions\area.js" />
     <Content Include="js\extentions\qty.js" />
+    <Content Include="js\sl\plugins\template.js" />
+    <Content Include="js\sl\sl.js" />
+    <Content Include="js\sl\style.js" />
+    <Content Include="js\sl\util\base64.js" />
+    <Content Include="js\sl\util\md5.js" />
     <Content Include="js\sl\widget\loading.js" />
     <Content Include="js\sl\widget\waterfall.js" />
     <Content Include="js\sl\base.js" />
@@ -352,7 +457,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\" />
-    <Folder Include="Views\Json\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\SL\SL.csproj">
@@ -368,6 +472,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Manage\Shop\Shop.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="assets\Index.cshtml" />
+    <Content Include="assets\Web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Json\User\Login.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Manage\Shop\Account.cshtml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
@@ -385,8 +499,8 @@
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
-          <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>11403</DevelopmentServerPort>
+          <AutoAssignPort>False</AutoAssignPort>
+          <DevelopmentServerPort>11404</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>
           </IISUrl>
