@@ -1,8 +1,9 @@
-﻿define(['$','sl/sl','ui/tabs','app','ui/loading'],function (require,exports,module) {
-    var $=require('zepto'),
+﻿define(['$','sl/sl','ui/tabs','app','sl/widget/loading','util/md5'],function (require,exports,module) {
+    var $=require('$'),
         sl=require('sl/sl'),
         app=require('app'),
-        Loading=require('ui/loading');
+        md5=require('util/md5'),
+        Loading=require('sl/widget/loading');
 
     module.exports=sl.Activity.extend({
         template: 'views/login.html',
@@ -16,6 +17,7 @@
 
         },
         onDestory: function () {
+            this.loading&&this.loading.destory();
         },
 
         login: function () {
@@ -36,17 +38,26 @@
             !that.loading&&(that.loading=new Loading(that.$el));
             that.loading.load({
                 url: '/json/user/login',
+                type: 'POST',
+                checkData: false,
+                data: {
+                    account: account,
+                    password: md5.md5(password).toUpperCase(),
+                    role: 0
+                },
                 success: function (res) {
                     this.hideLoading();
+
+                    res.userinfo.Auth=res.auth;
+
+                    localStorage.setItem("USERINFO",res.userinfo);
+                    that.redirect(r||'');
                 },
                 error: function (res) {
                     this.hideLoading();
-
                     sl.tip(res.msg);
                 }
             });
-
-            //that.redirect(r||'');
         },
 
         backToFrom: function () {

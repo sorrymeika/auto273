@@ -31,8 +31,11 @@ TransferID int identity primary key,
 AccountID int,
 ShopID int,
 PlateNumber varchar(20),
+--0:过户  1:转籍
 [Type] int,
+--0:待补 1:完成
 [Status] int,
+CarType varchar(20),
 Buyer varchar(20),
 BuyerMobile varchar(40),
 BuyerAddress varchar(400),

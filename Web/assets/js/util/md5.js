@@ -1,4 +1,4 @@
-﻿define('base64',[],function () {
+﻿define([],function () {
     /*
     * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
     * Digest Algorithm, as defined in RFC 1321.

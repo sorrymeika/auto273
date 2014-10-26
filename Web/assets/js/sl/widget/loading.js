@@ -96,7 +96,7 @@
         },
 
         hideLoading: function () {
-            this.$refreshing.hide();
+            this.$refreshing&&this.$refreshing.hide();
             this.$loading.hide();
         },
 
@@ -173,9 +173,9 @@
                 },
                 success: function (res,status,xhr) {
                     that._xhr=null;
-                    if(that.loadingOpt.check===false||that.check(res)) {
+                    if(that.loadingOptions.check===false||that.check(res)) {
 
-                        if(that.loadingOpt.checkData===false||that.hasData(res)) {
+                        if(that.loadingOptions.checkData===false||that.hasData(res)) {
                             that.loadingOptions.success.call(that,res,status,xhr);
 
                             that.loading=false;
