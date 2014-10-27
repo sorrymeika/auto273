@@ -1,6 +1,55 @@
-﻿@{
-    var data = SL.Data.SQL.Query("select ShopID,ShopName from Shop order by ShopName");
+﻿@using SL.Util
+@{
+    if (!SL.Web.Service.UserService.CheckAuth())
+    {
+        return;
+    }
 
-    Json.Write(new { success = true, data = data }, Output);
+    RequestUtil req = new RequestUtil();
+
+    if ("list".Equals(Request.QueryString["action"]))
+    {
+        int page = req.Int("page");
+        int pageSize = req.Int("pageSize");
+        int type = req.Int("type");
+
+        string where = "b.Deleted=0";
+        IList<string> parameters = new List<string>();
+        int total;
+
+        if (type == 1)
+        {
+            where += " and [Type]=1";
+        }
+        else if (type == 2)
+        {
+            where += "and [Status]=0";
+        }
+        else if (type == 3)
+        {
+            where += "and [Status]=1";
+        }
+
+        var data = SL.Data.SQL.QueryPage("TransferID",
+            "AccountID,TransferID,a.ShopID,b.ShopName,PlateNumber,[Type],[Status],CarType,Buyer,BuyerMobile,BuyerAddress,Seller,SellerMobile,SellerAddress,TransferRegion,Price,IsUpload",
+            "[Transfer] a join Shop b on a.ShopID=b.ShopID",
+            where,
+            page,
+            pageSize,
+            parameters,
+            out total);
+
+        if (data != null)
+        {
+            dynamic item;
+            for (int i = 0; i < data.Count; i++)
+            {
+                item = data[i];
+                item.Persent = item.IsUpload && item.AccountID != 0 ? "100%" : (item.AccountID != 0 || item.IsUpload) ? "80%" : "60%";
+            }
+        }
+
+        Json.Write(new { success = true, data = data, total = total }, Output);
+    }
     return;
 }

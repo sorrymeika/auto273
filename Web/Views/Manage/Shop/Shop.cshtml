@@ -234,6 +234,13 @@
                 text: "门店名称",
                 bind: "ShopName",
                 width: 10
+            },{
+                text: "查看",
+                bind: "Role",
+                width: 6,
+                render: function (cell,data) {
+                    cell.append('<i class="gridCellItem"><a href="Transfer?shopid='+data.ShopID+'" style="color:#c00">[下属过户单]</a></i>');
+                }
             }]
         }).search();
 

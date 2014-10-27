@@ -29,7 +29,7 @@
         return;
     }
 
-    SL.Data.SQL.Execute("insert into [Transfer] (AccountID,ShopID,PlateNumber,[Type],[Status],CarType,Buyer,BuyerMobile,BuyerAddress,Seller,SellerMobile,SellerAddress,TransferRegion,Price) values (@p0,@p1,@p2,@p3,0,@p4,@p5,@p6,@p7,@p8,@p9,@p10,@p11,@p12)", accountId, shopId, plateNumber, type, carType, buyer, buyerMobile, buyerAddress, seller, sellerMobile, sellerAddress, transferRegion, price);
+    SL.Data.SQL.Execute("insert into [Transfer] (AccountID,ShopID,PlateNumber,[Type],[Status],CarType,Buyer,BuyerMobile,BuyerAddress,Seller,SellerMobile,SellerAddress,TransferRegion,Price,AddTime) values (@p0,@p1,@p2,@p3,0,@p4,@p5,@p6,@p7,@p8,@p9,@p10,@p11,@p12,GetDate())", 0, shopId, plateNumber, type, carType, buyer, buyerMobile, buyerAddress, seller, sellerMobile, sellerAddress, transferRegion, price);
 
     Json.Write(new { success = true }, Output);
     return;

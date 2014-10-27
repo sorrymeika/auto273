@@ -102,6 +102,7 @@
     <Content Include="assets\js\sl\tmpl.js" />
     <Content Include="assets\js\sl\validation.js" />
     <Content Include="assets\js\sl\view.js" />
+    <Content Include="assets\js\sl\widget\dialog.js" />
     <Content Include="assets\js\sl\widget\dropdown.js" />
     <Content Include="assets\js\sl\widget\loading.js" />
     <Content Include="assets\js\sl\widget\waterfall.js" />
@@ -130,6 +131,7 @@
     <Content Include="assets\js\views\index.js" />
     <Content Include="assets\js\views\login.js" />
     <Content Include="assets\js\views\menu.js" />
+    <Content Include="assets\js\views\send.js" />
     <Content Include="assets\js\zepto.js" />
     <Content Include="assets\style.css" />
     <Content Include="assets\views\add.html" />
@@ -142,6 +144,7 @@
     <Content Include="assets\views\index.html" />
     <Content Include="assets\views\login.html" />
     <Content Include="assets\views\menu.html" />
+    <Content Include="assets\views\send.html" />
     <Content Include="Global.asax" />
     <Content Include="js\colorpicker\colorpicker.css" />
     <Content Include="js\colorpicker\colorpicker.js" />
@@ -459,6 +462,18 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Json\Shop.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Json\Transfer.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Json\User.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Json\Send.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Json\Del.cshtml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

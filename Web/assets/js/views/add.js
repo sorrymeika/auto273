@@ -1,4 +1,4 @@
-﻿define(['$','sl/sl','app','sl/widget/dropdown','sl/widget/loading'],function(require,exports,module) {
+﻿define(['$','sl/sl','app','sl/widget/dropdown','sl/widget/loading'],function (require,exports,module) {
     var $=require('$'),
         sl=require('sl/sl'),
         Dropdown=require('sl/widget/dropdown'),
@@ -10,7 +10,7 @@
         events: {
             'tap .js_save': 'save'
         },
-        onCreate: function() {
+        onCreate: function () {
             var that=this;
 
             that.dropdown=new Dropdown({
@@ -23,39 +23,45 @@
                 }],
                 isFixed: true,
                 attacher: that.$('.js_dropdown'),
-                onChange: function(e,i,dataItem) {
+                onChange: function (e,i,dataItem) {
                     that.$('.js_dropdown').html(dataItem.text);
-                    (dataItem.value==1)?that.$('.js_region').show():that.$('.js_region').hide()
+                    if(dataItem.value==1) {
+                        that.$('.js_region').show();
+                        that.$('.js_prize_bd').hide();
+                    } else {
+                        that.$('.js_region').hide();
+                        that.$('.js_prize_bd').show();
+                    }
                 }
             });
 
-            that.listenResult("shopChange",function(e,data) {
+            that.listenResult("shopChange",function (e,data) {
                 that.$('.js_shop').html(data.shopName);
             });
-            that.listenResult("buyerChange",function(e,data) {
+            that.listenResult("buyerChange",function (e,data) {
                 that.$('.js_buyer').html(data.name);
             });
-            that.listenResult("sellerChange",function(e,data) {
+            that.listenResult("sellerChange",function (e,data) {
                 that.$('.js_seller').html(data.name);
             });
         },
-        onStart: function() {
+        onStart: function () {
         },
-        onResume: function() {
+        onResume: function () {
         },
-        onShow: function() {
+        onShow: function () {
             if(!localStorage.getItem('USERINFO')) {
                 this.back('/login.html');
             }
         },
-        onDestory: function() {
+        onDestory: function () {
             sl.common.shopInfo=null;
             sl.common.buyerInfo=null;
             sl.common.sellerInfo=null;
             this.loading&&this.loading.destory();
         },
 
-        save: function() {
+        save: function () {
             var that=this,
                 sellerInfo=sl.common.sellerInfo,
                 data={
@@ -107,13 +113,13 @@
                 type: 'POST',
                 checkData: false,
                 data: data,
-                success: function(res) {
+                success: function (res) {
                     this.hideLoading();
 
                     that.setResult('addSuccess');
                     that.back('/');
                 },
-                error: function(res) {
+                error: function (res) {
                     this.hideLoading();
                     sl.tip(res.msg);
                 }

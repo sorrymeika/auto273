@@ -45,3 +45,9 @@ SellerAddress varchar(400),
 TransferRegion varchar(200),
 Price decimal
 )
+
+alter table [Transfer] add IsUpload bit default 0
+alter table [Transfer] add AddTime DateTime default GetDate()
+
+
+

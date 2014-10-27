@@ -83,7 +83,7 @@ namespace SL.Web.Service
             return false;
         }
 
-        public static bool CheckAuth()
+        public static bool CheckAuth(out int uid)
         {
             RequestUtil req = new RequestUtil();
             string account = req.String("account", false, "授权错误");
@@ -95,13 +95,21 @@ namespace SL.Web.Service
             }
             else if (CheckAuth(account, auth))
             {
+                uid = GetAccountID(account);
                 return true;
             }
             else
             {
                 Json.Write(new { success = false, returnCode = "0000", msg = "授权错误" }, HttpContext.Current.Response.Output);
             }
+            uid = 0;
             return false;
+        }
+
+        public static bool CheckAuth()
+        {
+            int uid;
+            return CheckAuth(out uid);
         }
 
         public static string GetAuth(string account)

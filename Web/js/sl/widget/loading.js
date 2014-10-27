@@ -158,6 +158,7 @@
 
             that.showLoading();
 
+
             that._xhr=$.ajax({
                 url: app.url(that.loadingOptions.url),
                 headers: that.loadingOptions.headers,
