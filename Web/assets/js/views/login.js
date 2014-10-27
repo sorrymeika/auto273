@@ -1,4 +1,4 @@
-﻿define(['$','sl/sl','ui/tabs','app','sl/widget/loading','util/md5'],function (require,exports,module) {
+﻿define(['$','sl/sl','ui/tabs','app','sl/widget/loading','util/md5'],function(require,exports,module) {
     var $=require('$'),
         sl=require('sl/sl'),
         app=require('app'),
@@ -12,15 +12,15 @@
             'tap .js_login': 'login'
         },
 
-        onCreate: function () {
+        onCreate: function() {
             var that=this;
 
         },
-        onDestory: function () {
+        onDestory: function() {
             this.loading&&this.loading.destory();
         },
 
-        login: function () {
+        login: function() {
             var that=this,
                 r=this.route.query['r'],
                 account=that.$('.js_account').val(),
@@ -45,22 +45,22 @@
                     password: md5.md5(password).toUpperCase(),
                     role: 0
                 },
-                success: function (res) {
+                success: function(res) {
                     this.hideLoading();
 
                     res.userinfo.Auth=res.auth;
 
-                    localStorage.setItem("USERINFO",res.userinfo);
+                    localStorage.setItem("USERINFO",JSON.stringify(res.userinfo));
                     that.redirect(r||'');
                 },
-                error: function (res) {
+                error: function(res) {
                     this.hideLoading();
                     sl.tip(res.msg);
                 }
             });
         },
 
-        backToFrom: function () {
+        backToFrom: function() {
             this.back();
         }
     });

@@ -32,6 +32,9 @@
 
     string auth = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(Md5.MD5(account + DateTime.Now.ToString("yyyyMMddHHmmss_ffff") + password) + "|" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")));
 
+    SL.Data.SQL.Execute("update Account set Auth=@p0 where AccountID=@p1", auth, userinfo.AccountID);
+    SL.Web.Service.UserService.SetAuth(userinfo.AccountName, auth);
+
     Json.Write(new
     {
         success = true,

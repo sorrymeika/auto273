@@ -2,6 +2,7 @@
 
     var $=require('$'),
         sl=require('./base'),
+        Event=require('./event'),
         tmpl=require('./tmpl'),
         slice=Array.prototype.slice,
         record=(function() {
@@ -93,6 +94,9 @@
         }
 
         that.options=$.extend({},that.options,options);
+        that._bindDelegateAttrs=[];
+        that._bindAttrs=[];
+        that._bindListenTo=[];
 
         that.el=that.$el[0];
 
@@ -110,9 +114,9 @@
         sealed: {},
         options: {},
         events: null,
-        _bindDelegateAttrs: [],
-        _bindAttrs: [],
-        _bindListenTo: [],
+        _bindDelegateAttrs: null,
+        _bindAttrs: null,
+        _bindListenTo: null,
         _bind: function(el,name,f) {
             this._bindDelegateAttrs.push([el,name,f]);
             this.$el.delegate(el,name,$.proxy(f,this));
@@ -150,28 +154,23 @@
             return that;
         },
 
-        listenTo: function($target,name,f) {
-            this._bindListenTo.push([$target,name,f]);
-            $($target).on(name,$.proxy(f,this));
+        listenTo: function(target,name,f) {
+            target=target.on?target:$(target);
+            target.on(name,$.proxy(f,target));
 
+            this._bindListenTo.push([target,name,f]);
             return this;
         },
 
-        on: function(selector,evt,handler) {
-            if(handler) {
-                this._bind(selector,evt,handler);
-            } else {
-                this.bind(selector,evt);
-            }
-            return this;
-        },
+        on: Event.on,
+        one: Event.one,
+        off: Event.off,
+        trigger: Event.trigger,
+
         $: function(selector) {
             return $(selector,this.$el);
         },
-        one: function(name,f) {
-            this.$el.one(name,$.proxy(f,this));
-            return this;
-        },
+
         bind: function(name,f) {
             this._bindAttrs.push([name,f]);
             this.$el.bind(name,$.proxy(f,this));
@@ -192,13 +191,7 @@
 
             return this;
         },
-        trigger: function() {
-            var args=slice.call(arguments),
-                name=args.shift();
 
-            this.$el.triggerHandler(name,args);
-            return this;
-        },
         initialize: function() {
         },
 
@@ -213,7 +206,7 @@
             });
 
             $.each(this._bindListenTo,function(i,attrs) {
-                $.fn.off.apply(attrs);
+                attrs.shift().off.apply(attrs);
             });
 
             that.one('Destory',function() {

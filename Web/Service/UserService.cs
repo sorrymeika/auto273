@@ -5,6 +5,7 @@ using System.Web;
 using System.Net.Mail;
 using SL.Util;
 using SL.Data;
+using System.Web.Helpers;
 
 namespace SL.Web.Service
 {
@@ -51,12 +52,12 @@ namespace SL.Web.Service
             return IsLogin() ? (int)GetUser()["UserID"] : 0;
         }
 
-        public static int GetUserID(string account)
+        public static int GetAccountID(string account)
         {
             IDictionary<string, int> data;
-            if (CacheUtil.ExistCache("UserID"))
+            if (CacheUtil.ExistCache("AccountID"))
             {
-                data = CacheUtil.Get<IDictionary<string, int>>("UserID");
+                data = CacheUtil.Get<IDictionary<string, int>>("AccountID");
                 if (data.ContainsKey(account))
                 {
                     return data[account];
@@ -65,11 +66,42 @@ namespace SL.Web.Service
             else
             {
                 data = new Dictionary<string, int>();
-                CacheUtil.Set("UserID", data);
+                CacheUtil.Set("AccountID", data);
             }
-            int userId = SQL.QueryValue<int>("select UserID from Users where Account=@p0", account);
+            int userId = SQL.QueryValue<int>("select AccountID from Account where AccountName=@p0", account);
             data[account] = userId;
             return userId;
+        }
+
+        public static bool CheckAuth(string account, string auth)
+        {
+            string serverAuth = GetAuth(account);
+            if (serverAuth == auth)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool CheckAuth()
+        {
+            RequestUtil req = new RequestUtil();
+            string account = req.String("account", false, "授权错误");
+            string auth = req.String("auth", false, "授权错误");
+
+            if (req.HasError)
+            {
+                Json.Write(new { success = false, returnCode = "0000", msg = req.FirstError, errors = req.GetErrors() }, HttpContext.Current.Response.Output);
+            }
+            else if (CheckAuth(account, auth))
+            {
+                return true;
+            }
+            else
+            {
+                Json.Write(new { success = false, returnCode = "0000", msg = "授权错误" }, HttpContext.Current.Response.Output);
+            }
+            return false;
         }
 
         public static string GetAuth(string account)
@@ -82,7 +114,7 @@ namespace SL.Web.Service
                     return data[account];
                 }
             }
-            string auth = SQL.QueryValue<string>("select Auth from Users where Account=@p0", account);
+            string auth = SQL.QueryValue<string>("select Auth from Account where AccountName=@p0", account);
             SetAuth(account, auth);
             return auth;
         }

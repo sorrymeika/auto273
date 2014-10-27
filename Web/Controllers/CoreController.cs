@@ -21,12 +21,12 @@ namespace SL.Web.Controllers
         {
             this.ViewBag.RouteData = this.RouteData.Values;
 
-            return View("~/Views/" + catalog + "/" + handle + ".cshtml");
+            return View("~/Views/" + catalog + (string.IsNullOrEmpty(handle) ? "" : "/" + handle) + ".cshtml");
         }
 
         public ActionResult JsonAction(string catalog, string handle)
         {
-            return View("~/Views/Json/" + catalog + "/" + handle + ".cshtml");
+            return View("~/Views/Json/" + catalog + (string.IsNullOrEmpty(handle) ? "" : "/" + handle) + ".cshtml");
         }
 
         public ActionResult Manage(string catalog, string handle = null)

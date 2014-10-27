@@ -1,4 +1,4 @@
-﻿define(['$','app','./../view'],function (require,exports,module) {
+﻿define(['$','app','./../view'],function(require,exports,module) {
     var $=require('$'),
         sl=require('./../base'),
         view=require('./../view'),
@@ -8,7 +8,7 @@
 
     var Loading=view.extend({
         events: {
-            'tap .js_reload': function () {
+            'tap .js_reload': function() {
                 this.reload();
             }
         },
@@ -27,16 +27,16 @@
         DATAKEY_TOTAL: 'total',
         DATAKEY_PAGENUM: '',
 
-        check: function (res) {
+        check: function(res) {
             var flag=!!(res&&res.success);
             return flag;
         },
 
-        hasData: function (res) {
+        hasData: function(res) {
             return res.data&&res.data.length;
         },
 
-        initialize: function () {
+        initialize: function() {
             var that=this;
 
             that.options.check&&(that.check=that.options.check);
@@ -44,7 +44,7 @@
             that.options.dataKeys&&(that.dataKeys=that.options.dataKeys);
         },
 
-        showMsg: function (msg) {
+        showMsg: function(msg) {
             if(this.pageIndex==1) {
                 this.$loading.find('.js_msg').show().html(msg);
                 this.$loading.show().find('.js_loading').hide();
@@ -54,7 +54,7 @@
             }
         },
 
-        showError: function () {
+        showError: function() {
             var that=this;
 
             if(that.isError) {
@@ -69,7 +69,7 @@
         template: '<div class="dataloading"><div class="msg js_msg"></div><p class="loading js_loading"></p></div>',
         refresh: '<div class="refreshing"><p class="msg js_msg"></p><p class="loading js_loading"></p></div>',
 
-        showLoading: function () {
+        showLoading: function() {
             var that=this;
 
             if(that.pageIndex==1) {
@@ -84,23 +84,24 @@
                     top: that.el.tagName=='body'?'':isLayout?0:that.$el.position().top
                 })
                 .appendTo(that.$el)
-                .show();
+                .show()
+                .find('.js_msg').html('');
 
                 that.$refreshing&&that.$refreshing.hide();
 
             } else {
                 var $refreshing=(that.$refreshing||(that.$refreshing=$(that.refresh))).appendTo(that.$el);
-                $refreshing.show();
+                $refreshing.show().find('.js_msg').html('正在载入...');
                 that.$loading&&that.$loading.hide();
             }
         },
 
-        hideLoading: function () {
+        hideLoading: function() {
             this.$refreshing&&this.$refreshing.hide();
             this.$loading.hide();
         },
 
-        reload: function () {
+        reload: function() {
             var that=this;
 
             if(that.isLoading) return;
@@ -112,7 +113,7 @@
             that._load();
         },
 
-        load: function (options) {
+        load: function(options) {
             var that=this;
 
             if(that.isLoading) return;
@@ -145,7 +146,7 @@
             that._load();
         },
 
-        _load: function () {
+        _load: function() {
             var that=this;
 
             for(var i=records.length-1;i>=0;i--) {
@@ -164,14 +165,14 @@
                 data: that.params,
                 type: that.loadingOptions.type,
                 dataType: that.loadingOptions.dataType||'json',
-                error: function (xhr) {
+                error: function(xhr) {
                     that._xhr=null;
                     that.isError=true;
                     that.showError();
                     that.loadingOptions.error.call(that,{ msg: '网络错误' },xhr);
                     that.isLoading=false;
                 },
-                success: function (res,status,xhr) {
+                success: function(res,status,xhr) {
                     that._xhr=null;
                     if(that.loadingOptions.check===false||that.check(res)) {
 
@@ -191,31 +192,31 @@
                     }
                     that.isLoading=false;
                 },
-                complete: function () {
+                complete: function() {
                 }
             });
         },
 
-        _refresh: function () {
+        _refresh: function() {
             this._load();
         },
 
-        _dataNotFound: function (e,res) {
+        _dataNotFound: function(e,res) {
             var that=this;
 
             that.showMsg('暂无数据');
 
             if(that.pageIndex==1) {
             } else {
-                setTimeout(function () {
-                    that.$refreshing.animate({ height: 0 },300,'ease-out',function () {
+                setTimeout(function() {
+                    that.$refreshing.animate({ height: 0 },300,'ease-out',function() {
                         that.$refreshing.hide().css({ height: '' });
                     });
                 },3000);
             }
         },
 
-        _scroll: function () {
+        _scroll: function() {
             var that=this;
 
             if(!that.loading
@@ -229,7 +230,7 @@
 
         _autoRefreshingEnabled: false,
 
-        checkAutoRefreshing: function (res) {
+        checkAutoRefreshing: function(res) {
             var that=this,
                 data=that.params;
 
@@ -243,7 +244,7 @@
             }
         },
 
-        enableAutoRefreshing: function () {
+        enableAutoRefreshing: function() {
             if(this._autoRefreshingEnabled) return;
             this._autoRefreshingEnabled=true;
 
@@ -259,7 +260,7 @@
             }
         },
 
-        disableAutoRefreshing: function () {
+        disableAutoRefreshing: function() {
             if(!this._autoRefreshingEnabled) return;
             this._autoRefreshingEnabled=false;
 
@@ -276,7 +277,7 @@
             this.$refreshing&&this.$refreshing.remove();
         },
 
-        abort: function () {
+        abort: function() {
             if(this._xhr) {
                 this.isLoad=false;
                 this._xhr.abort();
@@ -286,14 +287,13 @@
             }
         },
 
-        destory: function () {
+        destory: function() {
             this.abort();
-            view.fn.destory();
+
+            view.fn.destory.apply(this,arguments);
         }
 
     });
-
-    sl.zeptolize('Loading',Loading);
 
     module.exports=Loading;
 });

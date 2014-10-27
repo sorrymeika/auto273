@@ -209,11 +209,13 @@
                 that=this;
 
             $.each(this._bindDelegateAttrs,function(i,attrs) {
+                console.log(attrs)
                 $.fn.undelegate.apply($el,attrs);
             });
 
             $.each(this._bindListenTo,function(i,attrs) {
-                $.fn.off.apply(attrs);
+                console.log(attrs)
+                $.fn.off.apply(attrs.shift(),attrs);
             });
 
             that.one('Destory',function() {
