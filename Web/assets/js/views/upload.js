@@ -17,9 +17,6 @@
 
             that.$list=that.$('.js_list');
 
-            that.listenResult("photoSave",function (e,data) {
-            });
-
             that.imgLazyload=new ImgLazyload(that.$('.js_lazy[data-url]').removeClass('js_lazy'));
 
             app.queryThumbnailList(function (res) {
@@ -51,11 +48,6 @@
         },
 
         save: function () {
-            if(this.$list.find('li.check').length==0) {
-                sl.tip('请至少选择一张图片');
-                return;
-            }
-            this.forward('/photosave.html');
         }
 
     });

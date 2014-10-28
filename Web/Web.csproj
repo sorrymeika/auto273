@@ -104,6 +104,7 @@
     <Content Include="assets\js\sl\view.js" />
     <Content Include="assets\js\sl\widget\dialog.js" />
     <Content Include="assets\js\sl\widget\dropdown.js" />
+    <Content Include="assets\js\sl\widget\imglazyload.js" />
     <Content Include="assets\js\sl\widget\loading.js" />
     <Content Include="assets\js\sl\widget\waterfall.js" />
     <Content Include="assets\js\tmpl.js" />
@@ -126,6 +127,7 @@
     <Content Include="assets\js\views\add.js" />
     <Content Include="assets\js\views\about.js" />
     <Content Include="assets\js\views\modify.js" />
+    <Content Include="assets\js\views\photo.js" />
     <Content Include="assets\js\views\search.js" />
     <Content Include="assets\js\views\shop.js" />
     <Content Include="assets\js\views\seller.js" />
@@ -134,6 +136,8 @@
     <Content Include="assets\js\views\login.js" />
     <Content Include="assets\js\views\menu.js" />
     <Content Include="assets\js\views\send.js" />
+    <Content Include="assets\js\views\upload.js" />
+    <Content Include="assets\js\views\photosave.js" />
     <Content Include="assets\js\zepto.js" />
     <Content Include="assets\style.css" />
     <Content Include="assets\views\add.html" />
@@ -149,6 +153,8 @@
     <Content Include="assets\views\login.html" />
     <Content Include="assets\views\menu.html" />
     <Content Include="assets\views\send.html" />
+    <Content Include="assets\views\upload.html" />
+    <Content Include="assets\views\photosave.html" />
     <Content Include="Global.asax" />
     <Content Include="js\colorpicker\colorpicker.css" />
     <Content Include="js\colorpicker\colorpicker.js" />
