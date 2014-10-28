@@ -45,3 +45,5 @@ SellerAddress varchar(400),
 TransferRegion varchar(200),
 Price decimal
 )
+
+select * from Account
