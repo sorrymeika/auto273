@@ -1,40 +1,33 @@
-﻿define(['$','sl/sl','app','sl/widget/dropdown','sl/widget/loading'],function(require,exports,module) {
+﻿define(['$','sl/sl','app','sl/widget/loading'],function(require,exports,module) {
     var $=require('$'),
         sl=require('sl/sl'),
-        Dropdown=require('sl/widget/dropdown'),
         Loading=require('sl/widget/loading'),
         app=require('app');
 
     module.exports=sl.Activity.extend({
-        template: 'views/add.html',
+        template: 'views/modify.html',
         events: {
             'tap .js_save': 'save',
-            'tap .js_img': 'photo'
+            'blur input': function(e) {
+                //$(e.currentTarget).hide();
+            },
+            'tap .add_form li,.add_plate': function(e) {
+                //$(e.currentTarget).find('input').show().focus();
+                //e.preventDefault();
+            }
         },
         onCreate: function() {
             var that=this;
 
-            that.dropdown=new Dropdown({
-                data: [{
-                    text: '过户',
-                    value: 0
-                },{
-                    text: '转籍',
-                    value: 1
-                }],
-                isFixed: true,
-                attacher: that.$('.js_dropdown'),
-                onChange: function(e,i,dataItem) {
-                    that.$('.js_dropdown').html(dataItem.text);
-                    if(dataItem.value==1) {
-                        that.$('.js_region').show();
-                        that.$('.js_prize_bd').hide();
-                    } else {
-                        that.$('.js_region').hide();
-                        that.$('.js_prize_bd').show();
-                    }
-                }
-            });
+            that.$('.js_type').html(that.route.data.type==0?"过户":"转籍");
+
+            if(that.route.data.type==1) {
+                that.$('.js_region').show();
+                that.$('.js_prize_bd').hide();
+            } else {
+                that.$('.js_region').hide();
+                that.$('.js_prize_bd').show();
+            }
 
             that.listenResult("shopChange",function(e,data) {
                 that.$('.js_shop').html(data.shopName);
@@ -44,6 +37,39 @@
             });
             that.listenResult("sellerChange",function(e,data) {
                 that.$('.js_seller').html(data.name);
+            });
+
+            var userinfo=JSON.parse(localStorage.getItem('USERINFO'));
+
+            that.loading=new Loading(that.$('.addwrap'));
+            that.loading.load({
+                url: '/json/transfer?action=get',
+                data: {
+                    auth: userinfo.Auth,
+                    account: userinfo.AccountName,
+                    id: that.route.data.id
+                },
+                checkData: false,
+                success: function(res) {
+                    this.hideLoading();
+
+                    var data=res.data;
+                    that.$('.js_plate_number').val(res.data.PlateNumber);
+                    that.$('.js_price').val(res.data.Price);
+                    that.$('.js_car_type').val(res.data.CarType);
+                    that.$('.js_txt_region').val(res.data.TransferRegion);
+                    that.$('.js_shop').html(res.data.ShopName);
+                    that.$('.js_buyer').html(data.Buyer);
+                    that.$('.js_seller').html(data.Seller);
+
+                    sl.common.shopInfo={ shopId: res.data.ShopID,shopName: res.data.ShopName };
+                    sl.common.buyerInfo={ name: data.Buyer,mobile: data.BuyerMobile,address: data.BuyerAddress };
+                    sl.common.sellerInfo={ name: data.Seller,mobile: data.SellerMobile,address: data.SellerAddress };
+                },
+                error: function(res) {
+                    this.hideLoading();
+                    sl.tip(res.msg);
+                }
             });
         },
         onStart: function() {
@@ -80,7 +106,7 @@
                 sl.tip("请填写车型");
                 return;
             }
-            if(that.dropdown.index==1&&!data.region) {
+            if(that.route.data.type==1&&!data.region) {
                 sl.tip("请填写转籍地");
                 return;
             }
@@ -106,11 +132,12 @@
             data.sellerAddress=sellerInfo.address;
             data.auth=userinfo.Auth;
             data.account=userinfo.AccountName;
-            data.type=that.dropdown.index;
+            data.type=that.route.data.type;
+            data.id=that.route.data.id;
 
             !that.loading&&(that.loading=new Loading(that.$el));
             that.loading.load({
-                url: '/json/add',
+                url: '/json/modify',
                 type: 'POST',
                 checkData: false,
                 data: data,
@@ -126,10 +153,6 @@
                 }
             });
 
-        },
-
-        photo: function() {
-            this.forward('/photo.html');
         }
 
     });

@@ -46,4 +46,12 @@ TransferRegion varchar(200),
 Price decimal
 )
 
-select * from Account
+alter table [Transfer] add IsUpload bit default 0
+update [Transfer] set IsUpload=0
+alter table [Transfer] add AddTime DateTime default GetDate()
+update [Transfer] set AddTime=GetDate()
+
+
+
+
+

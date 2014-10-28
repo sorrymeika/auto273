@@ -107,6 +107,8 @@
                 me.type='render';
             } else if(type=="label") {
                 input=$('<div></div>').html(value).appendTo(td);
+                opt.width&&input.css({ width: opt.width });
+                opt.height&&input.css({ height: opt.height });
             } else {
                 if(type=="html"||type=="editor") {
                     var htmlContainer=$('<div style="position: relative;margin-bottom:6px;"></div>').appendTo(td);
@@ -227,11 +229,17 @@
             var input=this._input;
 
             if(!input) return;
-
             if(!arguments.length) return input.val();
 
-
             input.val(val);
+            return this;
+        },
+        html: function (val) {
+            var input=this._input;
+            if(!input) return;
+            if(typeof val==="undefined") return input.html();
+
+            input.html(val);
             return this;
         }
     };

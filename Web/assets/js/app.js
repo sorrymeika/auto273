@@ -7,7 +7,7 @@
         slice=Array.prototype.slice,
         blankFn=function() { };
 
-    window.callbackfunctions={};
+    window.hybirdFunctions={};
     window.complete=function() {
         if(isiPhone&&queue.length!=0) {
             queue.shift();
@@ -19,74 +19,40 @@
         $.fn.trigger.apply($(window),arguments);
     };
 
-    var queue=[],funcguid=0,stringify=util.stringify,
-        appFunc=function(method,params,callback) {
+    var queue=[],funcguid=0,
+        hybird=function(method,params,hybirdCallback) {
 
             var data={
                 method: method
-            },result;
+            },
+            result,
+            hybirdReturn;
 
-            if(typeof params!="undefined") {
-                var tmp=callback;
-                if(typeof params=='function') {
-                    callback=params;
-                    params=tmp;
-                }
-                if(typeof params!="undefined")
-                    data.params=params;
+            hybirdCallback=typeof params==="function"?params:hybirdCallback;
+            params=typeof params==="function"?null:params;
 
-                if(typeof callback!="undefined") {
-                    var funcName="mycallback"+(++funcguid),
-                        f=callback;
-                    data.callback=funcName;
-                    callbackfunctions[funcName]=function() {
-                        f.apply(null,arguments);
-                        delete callbackfunctions[funcName];
-                    };
-                }
+            data.params=params;
+
+            if(typeof hybirdCallback=="function") {
+                hybirdReturn="hybirdCallback"+(++funcguid);
+
+                data.callback=hybirdReturn;
+                hybirdFunctions[hybirdReturn]=function() {
+                    hybirdCallback.apply(null,arguments);
+                    delete hybirdFunctions[hybirdReturn];
+                };
             }
 
-            if(data.method=="post") {
-                result={};
-                if(data.params.files) {
-                    result.abort=function() {
-                        if(window.callbackfunctions[data.callback])
-                            window.callbackfunctions[data.callback]=blankFn;
-                    };
-
-                } else {
-                    result.xhr=$.ajax({
-                        url: data.params.url,
-                        data: data.params.data,
-                        type: 'POST',
-                        dataType: 'json',
-                        success: function(res) {
-                            console.log(res);
-                            window.callbackfunctions[data.callback](res);
-                        },
-                        error: function(res) {
-                            window.callbackfunctions[data.callback]({ success: false,msg: '网络错误' });
-                        }
-                    });
-                    result.abort=function() {
-                        result.xhr.abort();
-                        if(window.callbackfunctions[data.callback])
-                            window.callbackfunctions[data.callback]=blankFn;
-                    };
-                    return result;
-                }
-            }
-
-            if(false||navigator.platform=="Win32"||navigator.platform=="Win64") {
+            if(navigator.platform=="Win32"||navigator.platform=="Win64") {
                 switch(data.method) {
                     case 'onload':
-                        window.callbackfunctions[data.callback]();
+                        hybirdFunctions[hybirdReturn]();
                         break;
 
                     case "selectimage":
-                        window.callbackfunctions[data.callback]({
-                            path: "asdfsf",
-                            src: "asdfsf"
+                        hybirdFunctions[hybirdReturn]({
+                            path: "",
+                            src: ""
                         });
                         return;
                 }
@@ -94,13 +60,13 @@
             }
 
             if(isiPhone) {
-                var url='abschinajuicejs:a?'+encodeURIComponent(stringify(data));
+                var url='execslhybirdjsa:a?'+encodeURIComponent(JSON.stringify(data));
                 queue.push(url);
                 if(queue.length==1) {
                     location.href=url;
                 }
             } else if(isAndroid) {
-                prompt(stringify(data));
+                prompt(JSON.stringify(data));
             }
             return result;
         };
@@ -110,23 +76,26 @@
     return {
         isAndroid: isAndroid,
         versionName: isAndroid?'1.0':"1.0",
-        exec: appFunc,
-        load: function(f) {
-            appFunc('onload',function() {
+        exec: hybird,
+        exitLauncher: function(f) {
+            hybird('exitLauncher',function() {
                 f&&f();
             });
         },
         tip: function(msg) {
-            appFunc('tip',msg+"");
+            hybird('tip',msg+"");
         },
         selectImage: function(f) {
-            appFunc('selectimage',f);
+            hybird('selectImage',f);
         },
-        selectColor: function(f) {
-            appFunc('colorpicker',f);
+        queryThumbnailList: function(f) {
+            hybird('queryThumbnailList',f);
+        },
+        pickColor: function(f) {
+            hybird('pickColor',f);
         },
         share: function() {
-            appFunc('share');
+            hybird('share');
         },
         isDevelopment: navigator.platform=="Win32"||navigator.platform=="Win64",
         url: function(url) {
@@ -160,23 +129,23 @@
             if(data) postData.data=data;
             if(files) postData.files=files;
 
-            return appFunc('post',postData,function(res) {
+            return hybird('post',postData,function(res) {
                 if(cache===true) {
                     if(!res) {
                         var str=localStorage[url+"_"+(postData.data&&postData.data.page?postData.data.page:1)];
                         res=str?util.parse(str):null;
                     } else {
-                        localStorage[url+"_"+(postData.data&&postData.data.page?postData.data.page:1)]=util.stringify(res);
+                        localStorage[url+"_"+(postData.data&&postData.data.page?postData.data.page:1)]=JSON.stringify(res);
                     }
                 }
                 callback(res);
             });
         },
         exit: function() {
-            appFunc('exit');
+            hybird('exit');
         },
         update: function(downloadUrl,versionName,f) {
-            appFunc('updateApp',{
+            hybird('updateApp',{
                 downloadUrl: downloadUrl,
                 versionName: versionName
             },f);

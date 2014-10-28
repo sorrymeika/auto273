@@ -5,8 +5,6 @@
 
     if (Request["action"] == "search")
     {
-        Layout = null;
-
         int page = req.Int("Page", defaultValue: 1);
         int pageSize = req.Int("PageSize", defaultValue: 10);
         string keywords = req.String("Keywords");
@@ -40,7 +38,7 @@
         }
 
         IDictionary<string, bool> sortDic = new Dictionary<string, bool>{
-            { string.IsNullOrEmpty(sort) ? "ShopID" : sort, isAsc }
+            { string.IsNullOrEmpty(sort) ? "AccountID" : sort, isAsc }
         };
 
         int total;
@@ -368,6 +366,13 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 width: 6,
                 render: function (cell,data) {
                     cell.append('<i class="gridCellItem">'+(data.Role==0?'商户':"业务员")+'</i>');
+                }
+            },{
+                text: "查看",
+                bind: "Role",
+                width: 6,
+                render: function (cell,data) {
+                    cell.append('<i class="gridCellItem"><a href="Transfer?accountid='+data.AccountID+'" style="color:#c00">[下属过户单]</a></i>');
                 }
             }]
         }).search();

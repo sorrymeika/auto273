@@ -1,4 +1,4 @@
-﻿define(['$','ui/sl','app'],function (require,exports,module) {
+﻿define(['$','sl/sl','app'],function(require,exports,module) {
     var $=require('$'),
         sl=require('sl/sl'),
         app=require('app'),
@@ -7,15 +7,15 @@
     module.exports=sl.Activity.extend({
         template: 'views/about.html',
         events: {},
-        onCreate: function () {
+        onCreate: function() {
             var that=this;
 
         },
-        onStart: function () {
+        onStart: function() {
         },
-        onResume: function () {
+        onResume: function() {
         },
-        onDestory: function () {
+        onDestory: function() {
         }
     });;
 });

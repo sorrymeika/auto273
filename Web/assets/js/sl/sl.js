@@ -228,6 +228,7 @@
         start: function() {
             var that=this;
 
+            if(!location.hash) location.hash='/';
             that.hash=location.hash.replace(/^#/,'')||'/';
 
             that._getOrCreateActivity(that.hash,function(activity) {
@@ -235,35 +236,36 @@
                 that._history.push(activity.hash);
                 that._historyCursor++;
                 activity.$el.appendTo(that.$el);
-                activity.trigger('Resume');
-                activity.trigger('Show');
-            });
+                activity.then(function() {
+                    activity.trigger('Resume');
+                    activity.trigger('Show');
+                });
 
-            $(window).on('hashchange',function() {
-                that.hash=location.hash.replace(/^#/,'');
+                $(window).on('hashchange',function() {
+                    that.hash=location.hash.replace(/^#/,'')||'/';
 
-                var index=lastIndexOf(that._history,that.hash),
+                    var index=lastIndexOf(that._history,that.hash),
                     isForward=that._skipRecordHistory||index== -1;
 
-                if(that._skipRecordHistory!==true) {
-                    if(index== -1) {
-                        that._history.push(that.hash);
-                        that._historyCursor++;
-                    } else {
-                        that._history.length=index+1;
-                        that._historyCursor=index;
-                    }
-                } else
-                    that._skipRecordHistory=false;
+                    if(that._skipRecordHistory!==true) {
+                        if(index== -1) {
+                            that._history.push(that.hash);
+                            that._historyCursor++;
+                        } else {
+                            that._history.length=index+1;
+                            that._historyCursor=index;
+                        }
+                    } else
+                        that._skipRecordHistory=false;
 
+                    if(that.skip==0) {
+                        that._currentActivity[isForward?'forward':'back'](that.hash);
 
-                if(that.skip==0) {
-                    that._currentActivity[isForward?'forward':'back'](that.hash);
-
-                } else if(that.skip>0)
-                    that.skip--;
-                else
-                    that.skip=0;
+                    } else if(that.skip>0)
+                        that.skip--;
+                    else
+                        that.skip=0;
+                });
             });
 
             that.$el.appendTo(document.body);
@@ -376,7 +378,7 @@
             that.on('Destory',that.onDestory);
             that.on('QueryChange',that.onQueryChange);
 
-            $.when(that.options.templateEnabled&&that.initWithTemplate())
+            that._dfd=$.when(that.options.templateEnabled&&that.initWithTemplate())
                 .then($.proxy(that.onCreate,that))
                 .then(function() {
                     that.trigger('Start');
@@ -396,6 +398,10 @@
         onPause: noop,
 
         onQueryChange: noop,
+
+        then: function(f) {
+            return (this._dfd=this._dfd.then($.proxy(f,this)));
+        },
 
         listenResult: function(event,f) {
             this.listenTo(this.application,event,f);
@@ -456,7 +462,9 @@
             that.application.el.clientHeight;
 
             that.isPrepareExitAnimation=false;
-            that.trigger('Show');
+            that.then(function() {
+                that.trigger('Show');
+            });
         },
 
         compareUrl: function(url) {
@@ -474,8 +482,11 @@
                 application._currentActivity=activity;
                 that.$el.remove();
                 that.trigger('Pause');
-                activity.trigger('Resume');
-                activity.trigger('Show');
+
+                activity.then(function() {
+                    activity.trigger('Resume');
+                    activity.trigger('Show');
+                });
             });
         },
 
@@ -521,7 +532,9 @@
 
                 application._currentActivity=activity;
 
-                activity.trigger('Resume');
+                activity.then(function() {
+                    activity.trigger('Resume');
+                });
                 if(that.useAnimation) {
                     activity._animationFrom(animationName,type+'_enter_animation-from');
                     that._animationFrom(animationName,type+'_exit_animation-from');
@@ -560,7 +573,7 @@
         back: function(url,duration,animationName) {
             var that=this;
 
-            if(typeof url=='undefined') {
+            if(typeof url!=='string') {
                 that.prepareExitAnimation();
                 history.back();
 

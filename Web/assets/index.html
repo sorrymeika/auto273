@@ -16,7 +16,7 @@
             }
         });
 
-        seajs.use(['$','sl/sl','app'],function ($,sl,_app) {
+        seajs.use(['$','sl/sl','app'],function($,sl,_app) {
             var app=new sl.Application();
 
             app.mapRoute({
@@ -26,11 +26,12 @@
                 'buyer.html': 'buyer',
                 'seller.html': 'seller',
                 'shop.html': 'shop',
-                'credit/{id:\\d+}.html': 'credit',
-                'credits.html': 'credits',
-                'support.html': 'support',
+                'send/{shopid:\\d+}/{id:\\d+}.html': 'send',
+                'about.html': 'about',
                 'login.html': 'login',
-                'user.html': 'user',
+                'search.html': 'search',
+                'photo.html': 'photo',
+                'modify/{type:\\d+}/{id:\\d+}.html': 'modify',
                 'news/{id:\\d+}.html': 'news'
             });
 
@@ -39,9 +40,8 @@
             sl.activedApp=app;
 
             if(_app.isAndroid)
-                setTimeout(function () {
-                    _app.load(function () {
-                    });
+                setTimeout(function() {
+                    _app.exitLauncher(function() { });
                 },1500);
 
         });

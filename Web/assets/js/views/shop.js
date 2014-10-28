@@ -8,7 +8,8 @@
         template: 'views/shop.html',
         events: {
             'tap .js_list li': 'check',
-            'tap .js_save': 'save'
+            'tap .js_save': 'save',
+            'tap .js_back': 'back'
         },
         onCreate: function() {
             var that=this;
@@ -22,6 +23,11 @@
                 success: function(res) {
                     this.hideLoading();
                     that.$list.html(that.tmpl("list",res));
+
+                    if(sl.common.shopInfo&&sl.common.shopInfo.shopId) {
+                        var $target=that.$('[data-id="'+sl.common.shopInfo.shopId+'"]')
+                        $target.addClass('check').siblings('.check').removeClass('check');
+                    }
                 }
             });
 
@@ -55,7 +61,7 @@
                 shopName: shopName
             };
             this.setResult('shopChange',sl.common.shopInfo);
-            this.back('/add.html');
+            this.back();
         }
 
     });

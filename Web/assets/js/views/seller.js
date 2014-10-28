@@ -6,7 +6,8 @@
     module.exports=sl.Activity.extend({
         template: 'views/seller.html',
         events: {
-            'tap .js_save': 'save'
+            'tap .js_save': 'save',
+            'tap .js_back': 'back'
         },
         onCreate: function() {
             var that=this,
@@ -57,7 +58,7 @@
 
             sl.common.sellerInfo=sellerInfo;
             this.setResult('sellerChange',sellerInfo);
-            this.back('/add.html');
+            this.back();
         }
 
     });

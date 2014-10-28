@@ -6,113 +6,66 @@
     if (Request["action"] == "search")
     {
         Layout = null;
-
-        int page = req.Int("Page", defaultValue: 1);
-        int pageSize = req.Int("PageSize", defaultValue: 10);
-        string keywords = req.String("Keywords");
-        string sort = req.String("Sort");
-        bool isAsc = req.Bool("Asc", defaultValue: false);
-        string role = req.String("role");
+        int page = req.Int("page");
+        int pageSize = req.Int("pageSize", defaultValue: 10);
+        int type = req.Int("type");
         string shopId = req.String("shopId");
+        string accountId = req.String("accountId");
+        DateTime dtFrom = req.DateTime("dtFrom");
+        DateTime dtTo = req.DateTime("dtTo");
 
-        if (req.HasError)
+        string where = "b.Deleted=0";
+        IList<object> parameters = new List<object>();
+        int total;
+
+        if (type == 1)
         {
-            Json.Write(new { success = false, msg = req.FirstError, errors = req.GetErrors() }, Output);
-            return;
+            where += " and [Type]=1";
+        }
+        else if (type == 2)
+        {
+            where += "and [Status]=0";
+        }
+        else if (type == 3)
+        {
+            where += "and [Status]=1";
         }
 
-        string where = "Deleted=0";
-        List<object> parameters = new List<object>();
-        if (!string.IsNullOrEmpty(keywords))
-        {
-            where += " and (AccountName like '%'+@p" + parameters.Count + "+'%' or Name like '%'+@p" + parameters.Count + "+'%')";
-            parameters.Add(keywords);
-        }
-        if (!string.IsNullOrEmpty(role))
-        {
-            where += " and Role=@p" + parameters.Count;
-            parameters.Add(req.Int("role"));
-        }
         if (!string.IsNullOrEmpty(shopId))
         {
-            where += " and ShopID=@p" + parameters.Count;
+            where += " and a.ShopID=@p" + parameters.Count;
             parameters.Add(req.Int("shopId"));
         }
 
-        IDictionary<string, bool> sortDic = new Dictionary<string, bool>{
-            { string.IsNullOrEmpty(sort) ? "ShopID" : sort, isAsc }
-        };
+        if (!string.IsNullOrEmpty(accountId))
+        {
+            where += " and a.AccountID=@p" + parameters.Count;
+            parameters.Add(req.Int("accountId"));
+        }
 
-        int total;
-        var data = SQL.QueryPage("AccountID",
-            "AccountID,AccountName,ShopID,Name,Role,Password",
-            "Account",
-            where, page, pageSize, parameters, out total, sortDic);
+        if (DateTime.MinValue != dtFrom && DateTime.MinValue != dtTo)
+        {
+            where += " and AddTime between @p" + parameters.Count + " and @p" + (parameters.Count + 1);
+            parameters.Add(dtFrom.Date);
+            parameters.Add(dtTo.Date.AddDays(1));
+        }
+
+        var data = SQL.QueryPage("TransferID",
+            "TransferID,a.AccountID,AccountName,a.ShopID,b.ShopName,PlateNumber,[Type],[Status],CarType,Buyer,BuyerMobile,BuyerAddress,Seller,SellerMobile,SellerAddress,TransferRegion,Price,IsUpload,AddTime",
+            "[Transfer] a join Shop b on a.ShopID=b.ShopID join Account c on a.AccountID=c.AccountID",
+            where, page, pageSize, parameters, out total);
+
+        if (data != null)
+        {
+            dynamic item;
+            for (int i = 0; i < data.Count; i++)
+            {
+                item = data[i];
+                item.Persent = item.IsUpload && item.AccountID != 0 ? "100%" : (item.AccountID != 0 || item.IsUpload) ? "80%" : "60%";
+            }
+        }
 
         Json.Write(new { success = true, data = data, total = total }, Output);
-        return;
-    }
-    else if (Request["action"] == "add")
-    {
-        string accountName = req.String("accountName", false, "请填写账号");
-        string password = req.Password("password", "请填写密码");
-        string name = req.String("name", false, "请填写姓名");
-        int role = req.Int("role", false, "请选择账号类型");
-        int shopId = req.Int("shopId");
-
-        if (req.HasError)
-        {
-            Json.Write(new { success = false, msg = req.FirstError, errors = req.GetErrors() }, Output);
-            return;
-        }
-
-        if (SQL.Exists("select 1 from Account where AccountName=@p0 and Role=@p1", accountName, role))
-        {
-            Json.Write(new { success = false, msg = "账号已存在" }, Output);
-            return;
-        }
-
-        SQL.Execute("insert into Account (AccountName,Password,Name,Role,ShopID,Deleted) values (@p0,@p1,@p2,@p3,@p4,0)", accountName, password, name, role, shopId);
-
-        Json.Write(new { success = true }, Output);
-        return;
-    }
-    else if (Request["action"] == "modify")
-    {
-        int accountId = req.Int("AccountID", false, "请传入账号编号");
-        int shopId = req.Int("ShopID", false, "请传入门店编号");
-        string name = req.String("Name", false, "请传入名称");
-        string password = req.String("Password");
-
-        if (req.HasError)
-        {
-            Json.Write(new { success = false, msg = req.FirstError, errors = req.GetErrors() }, Output);
-            return;
-        }
-
-        SQL.Execute("update Account set Name=@p1,ShopID=@p2 where AccountID=@p0", accountId, name, shopId);
-
-        if (!string.IsNullOrEmpty(password))
-        {
-            SQL.Execute("update Account set Password=@p1 where AccountID=@p0", accountId, req.Password("Password"));
-        }
-
-        Json.Write(new { success = true }, Output);
-        return;
-    }
-    else if (Request["action"] == "delete")
-    {
-        int accountId = req.Int("AccountID", false, "请传入账号编号");
-
-        if (req.HasError)
-        {
-            Json.Write(new { success = false, msg = req.FirstError, errors = req.GetErrors() }, Output);
-            return;
-        }
-
-        SQL.Execute("update Account set Deleted=1 where AccountID=@p0", accountId);
-
-        Json.Write(new { success = true }, Output);
         return;
     }
 
@@ -128,7 +81,7 @@
         });
     }
 }
-<h1>账号管理</h1>
+<h1>过户单管理</h1>
 <div id="toolbar" class="toolbar"></div>
 <div id="grid"></div>
 <script>
@@ -139,176 +92,113 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
 
         //工具栏
         var buttons=new Buttons('#toolbar',[{
-            ico: "add",
-            value: "添加",
-            click: function () {
-                popupAdd.control('role').val()==1?
-                    popupAdd.control('shopId').show():
-                    popupAdd.control('shopId').hide();
-
-                popupAdd.show();
-            }
-        },{
             ico: "modify",
-            value: "修改",
-            disabled: true,
+            value: "查看详情",
             click: function () {
                 var data=grid.selectedRow().data;
-
-                popupModify.control('name').val(data.Name);
-                popupModify.control('shopId').val(data.ShopID);
-                (data.Role==0)
-                    ?popupModify.control('shopId').hide()
-                    :popupModify.control('shopId').show();
-
-                popupModify.control('accountId').val(data.AccountID);
-                popupModify.show();
-            }
-        },{
-            ico: "delete",
-            value: "停用账号",
-            disabled: true,
-            click: function () {
-                var data=grid.selectedRow().data;
-                if(window.confirm('确认停用账号？'))
-                    $.post('?action=delete',{
-                        AccountID: data.AccountID
-                    },function (res) {
-                        if(res.success) {
-                            grid.searchCurrentPage();
-                        } else
-                            alert(res.msg);
-                    },'json');
+                popupAdd.control('id').html(data.TransferID);
+                popupAdd.control('type').html(data.Type==0?"过户":"转籍");
+                popupAdd.control('status').html(data.Status==0?"待补":"完成");
+                popupAdd.control('accountName').html(data.AccountName);
+                popupAdd.control('plateNumber').html(data.PlateNumber);
+                popupAdd.control('shopName').html(data.ShopName);
+                popupAdd.control('price').html(data.Price);
+                popupAdd.control('buyer').html(data.Buyer);
+                popupAdd.control('buyerMobile').html(data.BuyerMobile);
+                popupAdd.control('buyerAddress').html(data.BuyerAddress);
+                popupAdd.control('seller').html(data.Seller);
+                popupAdd.control('sellerMobile').html(data.SellerMobile);
+                popupAdd.control('sellerAddress').html(data.SellerAddress);
+                popupAdd.control('transferRegion').html(data.TransferRegion);
+                popupAdd.control('addTime').html(util.formatDate(data.AddTime));
+                
+                popupAdd.show();
             }
         }]);
 
         var popupAdd=new popup.Form({
-            title: '添加账号',
+            title: '查看详情',
             width: 450,
+            height: 500,
             controls: {
+                id: {
+                    label: '编号：',
+                    type: 'label',
+                    width: 260
+                },
+                plateNumber: {
+                    label: '车牌：',
+                    type: 'label'
+                },
+                type: {
+                    label: '类型：',
+                    type: 'label',
+                    width: 260
+                },
+                status: {
+                    label: '状态：',
+                    type: 'label',
+                    width: 260
+                },
                 accountName: {
-                    label: '账号',
-                    type: 'text',
-                    width: 260,
-                    validation: {
-                        emptyAble: false,
-                        emptyText: '请填写账号'
-                    }
+                    label: '账号：',
+                    type: 'label',
+                    width: 260
                 },
-                password: {
-                    label: '密码',
-                    type: 'password',
-                    width: 260,
-                    validation: {
-                        emptyAble: false,
-                        emptyText: '请填写密码'
-                    }
+                shopName: {
+                    label: '所属门店：',
+                    type: 'label'
                 },
-                name: {
-                    label: '姓名',
-                    type: 'text',
-                    width: 260,
-                    validation: {
-                        emptyAble: false,
-                        emptyText: '请填写姓名'
-                    }
+                price: {
+                    label: '成交价：',
+                    type: 'label',
+                    width: 260
                 },
-                role: {
-                    label: '账号类型',
-                    type: 'select',
-                    emptyAble: false,
-                    options: [{
-                        value: 1,
-                        text: '业务员'
-                    },{
-                        value: 0,
-                        text: '商户'
-                    }],
-                    events: {
-                        'change': function (e) {
-                            $(e.target).val()==1?
-                                popupAdd.control('shopId').show():
-                                popupAdd.control('shopId').hide();
-                        }
-                    }
+                buyer: {
+                    label: '买家：',
+                    type: 'label',
+                    width: 260
                 },
-                shopId: {
-                    label: '所属门店',
-                    type: 'select',
-                    emptyAble: false,
-                    options: shops
-                }
-            },
-            buttons: [{
-                value: '添加',
-                click: function () {
-                    popupAdd.submit({
-                        url: '?action=add',
-                        success: function (res) {
-                            if(res.success) {
-                                popupAdd.hide().reset();
-                                grid.searchCurrentPage();
-                            } else {
-                                alert(res.msg);
-                            }
-                        }
-                    });
-                }
-            },{
-                value: '取消',
-                click: function () {
-                    popupAdd.hide().reset();
-                }
-            }]
-        });
-
-        var popupModify=new popup.Form({
-            title: '修改账号',
-            width: 450,
-            controls: {
-                accountId: {
-                    type: 'hidden'
+                buyerMobile: {
+                    label: '买家手机：',
+                    type: 'label',
+                    width: 260
                 },
-                name: {
-                    label: '姓名',
-                    type: 'text',
-                    width: 260,
-                    validation: {
-                        emptyAble: false,
-                        emptyText: '请填写姓名'
-                    }
+                buyerAddress: {
+                    label: '买家地址：',
+                    type: 'label',
+                    width: 260
                 },
-                shopId: {
-                    label: '所属门店',
-                    type: 'select',
-                    emptyAble: false,
-                    options: shops
+                seller: {
+                    label: '卖家：',
+                    type: 'label',
+                    width: 260
                 },
-                password: {
-                    label: '密码(选填)',
-                    type: 'password',
+                sellerMobile: {
+                    label: '卖家手机：',
+                    type: 'label',
+                    width: 260
+                },
+                sellerAddress: {
+                    label: '卖家地址：',
+                    type: 'label',
+                    width: 260
+                },
+                transferRegion: {
+                    label: '转籍地：',
+                    type: 'label',
+                    width: 260
+                },
+                addTime: {
+                    label: '添加日期：',
+                    type: 'label',
                     width: 260
                 }
             },
             buttons: [{
-                value: '修改',
+                value: '关闭',
                 click: function () {
-                    popupModify.submit({
-                        url: '?action=modify',
-                        success: function (res) {
-                            if(res.success) {
-                                popupModify.hide().reset();
-                                grid.searchCurrentPage();
-                            } else {
-                                alert(res.msg);
-                            }
-                        }
-                    });
-                }
-            },{
-                value: '取消',
-                click: function () {
-                    popupModify.hide().reset();
+                    popupAdd.hide();
                 }
             }]
         });
@@ -318,27 +208,41 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
             search: {
                 url: "?action=search",
                 beforeSend: function () {
-                    buttons.items([1,2]).disable();
+                    buttons.items(0).disable();
                 },
                 data: {
-                    role: {
-                        label: '账号类型',
+                    type: {
+                        label: '状态',
                         type: 'select',
                         options: [{
-                            value: '',
-                            text: '请选择'
+                            value: 0,
+                            text: '全部'
                         },{
                             value: 1,
-                            text: '业务员'
+                            text: '转籍'
                         },{
-                            value: 0,
-                            text: '商户'
+                            value: 2,
+                            text: '待补'
+                        },{
+                            value: 3,
+                            text: '完成'
                         }]
                     },
+                    dtFrom: {
+                        label: '日期 从',
+                        type: 'calendar'
+                    },
+                    dtTo: {
+                        label: '到',
+                        type: 'calendar'
+                    },
                     shopId: {
-                        label: '所属店铺',
-                        type: 'select',
-                        options: shops
+                        type: 'hidden',
+                        value: util.getQueryString("?shopid")
+                    },
+                    accountId: {
+                        type: 'hidden',
+                        value: util.getQueryString("?accountid")
                     },
                     keywords: {
                         label: "关键字：",
@@ -347,27 +251,38 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 }
             },
             onRowSelect: function () {
-                buttons.items([1,2]).enable();
+                buttons.items(0).enable();
             },
             pageEnabled: true,
             columns: [{
                 text: "编号",
-                bind: "AccountID",
+                bind: "TransferID",
                 width: 3
             },{
-                text: "账号",
-                bind: "AccountName",
-                width: 10
+                text: "车牌号",
+                bind: "PlateNumber",
+                width: 5
             },{
-                text: "姓名",
-                bind: "Name",
+                text: "门店",
+                bind: "ShopName",
+                width: 6
+            },{
+                text: "业务员",
+                bind: "AccountName",
                 width: 6
             },{
                 text: "类型",
-                bind: "Role",
+                bind: "Type",
                 width: 6,
                 render: function (cell,data) {
-                    cell.append('<i class="gridCellItem">'+(data.Role==0?'商户':"业务员")+'</i>');
+                    cell.append('<i class="gridCellItem">'+(data.Type==0?'过户':"转籍")+'</i>');
+                }
+            },{
+                text: "状态",
+                bind: "Status",
+                width: 6,
+                render: function (cell,data) {
+                    cell.append('<i class="gridCellItem">'+(data.Status==0?'待补':"完成")+'</i>');
                 }
             }]
         }).search();

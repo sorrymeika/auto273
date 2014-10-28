@@ -6,7 +6,8 @@
     module.exports=sl.Activity.extend({
         template: 'views/buyer.html',
         events: {
-            'tap .js_save': 'save'
+            'tap .js_save': 'save',
+            'tap .js_back': 'back'
         },
         onCreate: function() {
             var that=this,
@@ -57,7 +58,7 @@
 
             sl.common.buyerInfo=buyerInfo;
             this.setResult('buyerChange',buyerInfo);
-            this.back('/add.html');
+            this.back();
         }
 
     });

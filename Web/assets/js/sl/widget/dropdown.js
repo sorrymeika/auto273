@@ -60,7 +60,7 @@
                 if(that.$el.hasClass('hide')) that.$el.hide();
             });
 
-            that.options.onChange&&that.bind('Change',that.options.onChange);
+            that.options.onChange&&that.on('Change',that.options.onChange);
         },
         show: function() {
             var that=this,
