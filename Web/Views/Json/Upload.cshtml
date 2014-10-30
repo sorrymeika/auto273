@@ -1,0 +1,28 @@
+﻿@using SL.Util
+@{
+    int accountId;
+
+    if (!SL.Web.Service.UserService.CheckAuth(out accountId))
+    {
+        return;
+    }
+
+    RequestUtil req = new RequestUtil();
+
+    int transferId = req.Int("TransferID", false, "缺少单据编号");
+    var photo = req.File("Photo", false, "请上传图片");
+    var description = req.String("Description", false, "请填写描述");
+
+    if (req.HasError)
+    {
+        Json.Write(new { success = false, returnCode = "0000", msg = req.FirstError, errors = req.GetErrors() }, Output);
+        return;
+    }
+
+    var src = photo.Save();
+
+    SL.Data.SQL.Execute("insert into [Photo] (AccountID,TransferID,Photo,Description) values (@p0,@p1,@p2,@p3)", accountId, transferId, src, description);
+
+    Json.Write(new { success = true, src = src }, Output);
+    return;
+}

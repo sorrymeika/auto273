@@ -7,7 +7,7 @@
 
     RequestUtil req = new RequestUtil();
 
-    int id = req.Int("id", false, "请选择门店");
+    int id = req.Int("id", false, "缺少单据编号");
     int shopId = req.Int("shopId", false, "请选择门店");
     string plateNumber = req.String("plateNumber", false, "请填写车牌号");
     int type = req.Int("type", false, "请填写车牌号");
