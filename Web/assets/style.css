@@ -218,6 +218,12 @@ ul.table li > p { display: table-cell; text-align: center; padding-top: 5px; }
 .photo_list li.take { background-color: #333; text-align: center; color: #fff; font-size: 13px; padding-top: 19px; }
 .photo_list li.take.active { background: #666; }
 .photo_list li.take:before { width: 75px; height: 50px; content: ''; display: block; text-align: center; background: url(images/site.png) -125px -125px no-repeat; margin: 0 auto 7px auto; background-size: 320px auto; }
+
+.photo_list li.select {background-color: #333; text-align: center; color: #fff; font-size: 13px; padding-top: 19px; position: relative; }
+.photo_list li.select.active { background: #666; }
+.photo_list li.select:before { width: 10px; height: 50px; content: ''; display: block; margin: 0 auto 7px auto; background:#ccc; }
+.photo_list li.select:after { width: 50px; height: 10px; content: ''; display: block; position: absolute; top: 39px; left: 50%; margin-left: -25px; background:#ccc; }
+
 .photo_list li.item { position: relative; }
 .photo_list li.item:after { content: ''; display: block; position: absolute; width: 16px; height: 16px; background-color: rgba(0,0,0,.5); right: 6px; top: 6px; }
 .photo_list li.item.active { -webkit-transform: scale(.98); }

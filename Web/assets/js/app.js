@@ -1,4 +1,4 @@
-﻿define('app',['$','util'],function (require,exports,module) {
+﻿define('app',['$','util'],function(require,exports,module) {
 
     var $=require('$'),
         util=require('util'),
@@ -6,22 +6,22 @@
         ios=/iPhone|iPad|iPod/.test(ua),
         isAndroid=/Android/.test(ua),
         slice=Array.prototype.slice,
-        blankFn=function () { };
+        blankFn=function() { };
 
     window.hybirdFunctions={};
-    window.complete=function () {
+    window.complete=function() {
         if(ios&&queue.length!=0) {
             queue.shift();
             if(queue.length!=0) location.href=queue.shift();
         }
     };
 
-    window.trigger=window.app_trigger=function () {
+    window.trigger=window.app_trigger=function() {
         $.fn.trigger.apply($(window),arguments);
     };
 
     var queue=[],funcguid=0,
-        hybird=function (method,params,hybirdCallback) {
+        hybird=function(method,params,hybirdCallback) {
 
             var data={
                 method: method
@@ -37,7 +37,7 @@
                 hybirdReturn="hybirdCallback"+(++funcguid);
 
                 data.callback=hybirdReturn;
-                hybirdFunctions[hybirdReturn]=function () {
+                hybirdFunctions[hybirdReturn]=function() {
                     hybirdCallback.apply(null,arguments);
                     delete hybirdFunctions[hybirdReturn];
                 };
@@ -66,44 +66,47 @@
             isAndroid: isAndroid,
             versionName: isAndroid?'1.0':"1.0",
             exec: hybird,
-            exitLauncher: function (f) {
-                hybird('exitLauncher',function () {
+            exitLauncher: function(f) {
+                hybird('exitLauncher',function() {
                     f&&f();
                 });
             },
-            tip: function (msg) {
+            tip: function(msg) {
                 hybird('tip',msg+"");
             },
-            selectImage: function (f) {
-                hybird('selectImage',f);
+            pickImage: function(f) {
+                hybird('pickImage',f);
             },
-            queryThumbnailList: function (f) {
+            takePhoto: function(f) {
+                hybird('takePhoto',f);
+            },
+            queryThumbnailList: function(f) {
                 hybird('queryThumbnailList',f);
             },
-            pickColor: function (f) {
+            pickColor: function(f) {
                 hybird('pickColor',f);
             },
-            share: function () {
+            share: function() {
                 hybird('share');
             },
             isDevelopment: navigator.platform=="Win32"||navigator.platform=="Win64",
-            url: function (url) {
-                return /^http\:\/\//.test(url)?url:navigator.platform=="Win32"||navigator.platform=="Win64"?url:('http://photo.ie1e.com'+url);
+            url: function(url) {
+                return /^http\:\/\//.test(url)?url:navigator.platform=="Win32"||navigator.platform=="Win64"?url:('http://273.ie1e.com'+url);
             },
-            upload: function (url,file,data,callback) {
-                callback=typeof data==='function'?data:callback;
-                data=typeof data==='function'?null:data;
+            post: function(url,data,files,callback) {
+                callback=typeof files==='function'?files:callback;
+                files=typeof files==='function'?null:files;
 
-                hybird('upload',{
+                hybird('post',{
                     url: this.url(url),
-                    file: file,
+                    files: files,
                     data: data
                 },callback);
             },
-            exit: function () {
+            exit: function() {
                 hybird('exit');
             },
-            update: function (downloadUrl,versionName,f) {
+            update: function(downloadUrl,versionName,f) {
                 hybird('updateApp',{
                     downloadUrl: downloadUrl,
                     versionName: versionName

@@ -52,6 +52,13 @@ alter table [Transfer] add AddTime DateTime default GetDate()
 update [Transfer] set AddTime=GetDate()
 
 
-
-
+--2014/10/30
+create table Photo(
+PhotoID int identity primary key,
+AccountID int,
+TransferID int,
+Photo varchar(255),
+Description varchar(200),
+AddTime datetime default GetDate()
+)
 
