@@ -136,7 +136,7 @@
     <Content Include="assets\js\views\login.js" />
     <Content Include="assets\js\views\menu.js" />
     <Content Include="assets\js\views\send.js" />
-    <Content Include="assets\js\views\upload.js" />
+    <Content Include="assets\js\views\photolist.js" />
     <Content Include="assets\js\views\photosave.js" />
     <Content Include="assets\js\zepto.js" />
     <Content Include="assets\style.css" />
@@ -153,7 +153,7 @@
     <Content Include="assets\views\login.html" />
     <Content Include="assets\views\menu.html" />
     <Content Include="assets\views\send.html" />
-    <Content Include="assets\views\upload.html" />
+    <Content Include="assets\views\photolist.html" />
     <Content Include="assets\views\photosave.html" />
     <Content Include="Global.asax" />
     <Content Include="js\colorpicker\colorpicker.css" />

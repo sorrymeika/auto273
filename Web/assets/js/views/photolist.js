@@ -1,4 +1,4 @@
-﻿define(['$','sl/sl','app','sl/widget/loading','sl/widget/imglazyload'],function (require,exports,module) {
+﻿define(['$','sl/sl','app','sl/widget/loading','sl/widget/imglazyload'],function(require,exports,module) {
     var $=require('$'),
         sl=require('sl/sl'),
         app=require('app'),
@@ -6,48 +6,47 @@
         Loading=require('sl/widget/loading');
 
     module.exports=sl.Activity.extend({
-        template: 'views/photo.html',
+        template: 'views/photolist.html',
         events: {
             'tap .js_list li.item': 'check',
             'tap .js_save': 'save',
             'tap .js_back': 'back'
         },
-        onCreate: function () {
+        onCreate: function() {
             var that=this;
 
             that.$list=that.$('.js_list');
 
             that.imgLazyload=new ImgLazyload(that.$('.js_lazy[data-url]').removeClass('js_lazy'));
 
-            app.queryThumbnailList(function (res) {
-                that.$list.append(that.tmpl('list',{
-                    data: res
-                }));
-            });
+            that.$list.append(that.tmpl('list',{
+                data: []
+            }));
+            that.imgLazyload.add(that.$('.js_lazy[data-url]').removeClass('js_lazy'));
 
         },
-        onStart: function () {
+        onStart: function() {
         },
-        onResume: function () {
+        onResume: function() {
         },
-        onShow: function () {
+        onShow: function() {
             if(!localStorage.getItem('USERINFO')) {
                 this.back('/');
             }
         },
-        onDestory: function () {
+        onDestory: function() {
             this.loading&&this.loading.destory();
             this.imgLazyload&&this.imgLazyload.destory();
         },
 
-        check: function (e) {
+        check: function(e) {
             var $target=$(e.currentTarget);
             $target.toggleClass('check');
 
             this.$(".js_save").html('保存('+this.$list.find('li.check').length+')');
         },
 
-        save: function () {
+        save: function() {
         }
 
     });
