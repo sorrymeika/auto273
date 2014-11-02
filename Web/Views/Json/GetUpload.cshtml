@@ -9,26 +9,51 @@
 
     RequestUtil req = new RequestUtil();
 
-    int transferId = req.Int("TransferID", false, "缺少单据编号");
-    int page = req.Int("page", defaultValue: 1);
-    int pageSize = req.Int("pageSize", defaultValue: 20);
-
-    if (req.HasError)
+    if (req.String("action") == "delete")
     {
-        Json.Write(new { success = false, returnCode = "0000", msg = req.FirstError, errors = req.GetErrors() }, Output);
+        string ids = req.String("ids", regex: @"\d+(,\d+){0,}", regexText: "ids error");
+        if (req.HasError)
+        {
+            Json.Write(new { success = false, returnCode = "0000", msg = req.FirstError, errors = req.GetErrors() }, Output);
+            return;
+        }
+
+        SL.Data.SQL.Execute("delete from [Photo] where PhotoID in (" + ids + ")");
+
+        Json.Write(new { success = true }, Output);
         return;
     }
+    else
+    {
+        int transferId = req.Int("TransferID", false, "缺少单据编号");
+        int page = req.Int("page", defaultValue: 1);
+        int pageSize = req.Int("pageSize", defaultValue: 20);
 
-    int total;
-    var data = SL.Data.SQL.QueryPage("PhotoID",
-            "PhotoID,AccountID,TransferID,Photo,Description ",
-            "[Photo]",
-            "TransferID=@p0",
-            page,
-            pageSize,
-            new object[] { transferId },
-            out total);
+        if (req.HasError)
+        {
+            Json.Write(new { success = false, returnCode = "0000", msg = req.FirstError, errors = req.GetErrors() }, Output);
+            return;
+        }
 
-    Json.Write(new { success = true, data = data, total = total }, Output);
-    return;
+        int total;
+        var data = SL.Data.SQL.QueryPage("PhotoID",
+                "PhotoID,AccountID,TransferID,Photo,Description ",
+                "[Photo]",
+                "TransferID=@p0",
+                page,
+                pageSize,
+                new object[] { transferId },
+                out total);
+
+        if (null != data)
+        {
+            data.All(a =>
+            {
+                return true;
+            });
+        }
+
+        Json.Write(new { success = true, data = data, total = total }, Output);
+        return;
+    }
 }

@@ -53,11 +53,7 @@
             }
 
             if(ios) {
-                var url='execslhybirdjsa:a?'+encodeURIComponent(JSON.stringify(data));
-                queue.push(url);
-                if(queue.length==1) {
-                    location.href=url;
-                }
+                alert(JSON.stringify(data));
             } else if(isAndroid) {
                 prompt(JSON.stringify(data));
             }

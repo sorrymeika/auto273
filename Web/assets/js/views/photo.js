@@ -14,7 +14,7 @@
             'tap .js_take': 'takePhoto',
             'tap .js_select': 'pickImage',
             'tap .js_photolist': function() {
-                this.forward('/photolist/'+that.route.data.id+'.html');
+                this.forward('/photolist/'+this.route.data.id+'.html');
             }
         },
         onCreate: function() {

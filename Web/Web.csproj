@@ -128,6 +128,7 @@
     <Content Include="assets\js\views\about.js" />
     <Content Include="assets\js\views\modify.js" />
     <Content Include="assets\js\views\photo.js" />
+    <Content Include="assets\js\views\photolist.js" />
     <Content Include="assets\js\views\search.js" />
     <Content Include="assets\js\views\shop.js" />
     <Content Include="assets\js\views\seller.js" />
@@ -136,7 +137,6 @@
     <Content Include="assets\js\views\login.js" />
     <Content Include="assets\js\views\menu.js" />
     <Content Include="assets\js\views\send.js" />
-    <Content Include="assets\js\views\photolist.js" />
     <Content Include="assets\js\views\photosave.js" />
     <Content Include="assets\js\zepto.js" />
     <Content Include="assets\style.css" />
@@ -145,6 +145,7 @@
     <Content Include="assets\views\buyer.html" />
     <Content Include="assets\views\photo.html" />
     <Content Include="assets\views\modify.html" />
+    <Content Include="assets\views\photolist.html" />
     <Content Include="assets\views\shop.html" />
     <Content Include="assets\views\seller.html" />
     <Content Include="assets\views\credit.html" />
@@ -153,7 +154,6 @@
     <Content Include="assets\views\login.html" />
     <Content Include="assets\views\menu.html" />
     <Content Include="assets\views\send.html" />
-    <Content Include="assets\views\photolist.html" />
     <Content Include="assets\views\photosave.html" />
     <Content Include="Global.asax" />
     <Content Include="js\colorpicker\colorpicker.css" />
@@ -417,7 +417,9 @@
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
-    <Content Include="Views\Web.config" />
+    <Content Include="Views\Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Views\_ViewStart.cshtml" />
   </ItemGroup>
   <ItemGroup>
