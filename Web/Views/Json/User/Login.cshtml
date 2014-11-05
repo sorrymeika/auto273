@@ -11,7 +11,7 @@
         return;
     }
 
-    var userinfo = SL.Data.SQL.QuerySingle("select AccountID,AccountName,ShopID,Name,Role,Password,Deleted from Account where AccountName=@p0 and Role=@p1", account, role);
+    var userinfo = SL.Data.SQL.QuerySingle("select AccountID,AccountName,ShopID,Name,Role,Password,Deleted,Auth from Account where AccountName=@p0 and Role=@p1", account, role);
     if (null == userinfo)
     {
         Json.Write(new { success = false, msg = "账号不存在", account = account }, Output);
@@ -30,9 +30,17 @@
         return;
     }
 
-    string auth = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(Md5.MD5(account + DateTime.Now.ToString("yyyyMMddHHmmss_ffff") + password) + "|" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")));
+    string auth;
+    if (string.IsNullOrEmpty(userinfo.Auth))
+    {
+        auth = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(Md5.MD5(account + DateTime.Now.ToString("yyyyMMddHHmmss_ffff") + password) + "|" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")));
+        SL.Data.SQL.Execute("update Account set Auth=@p0 where AccountID=@p1", auth, userinfo.AccountID);
+    }
+    else
+    {
+        auth = userinfo.Auth;
+    }
 
-    SL.Data.SQL.Execute("update Account set Auth=@p0 where AccountID=@p1", auth, userinfo.AccountID);
     SL.Web.Service.UserService.SetAuth(userinfo.AccountName, auth);
 
     Json.Write(new

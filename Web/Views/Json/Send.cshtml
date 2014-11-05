@@ -8,7 +8,7 @@
 
     RequestUtil req = new RequestUtil();
 
-    int transferId = req.Int("id", defaultValue: 1);
+    int transferId = req.Int("transferId");
     int accountId = req.Int("accountid");
 
     if (req.HasError)
@@ -17,7 +17,7 @@
         return;
     }
 
-    SQL.Execute("update [Transfer] set AccountID=@p0 where TransferID=@p1", transferId, accountId);
+    SQL.Execute("update [Transfer] set AccountID=@p0 where TransferID=@p1", accountId, transferId);
 
     Json.Write(new { success = true }, Output);
     return;

@@ -61,6 +61,7 @@
                 for (int i = 0; i < data.Count; i++)
                 {
                     item = data[i];
+                    item.IsMine = item.AccountID == accountid;
                     item.Photo = db.QueryValue<string>("select top 1 Photo from [Photo] where TransferID=@p0", item.TransferID);
 
                     item.Photo = item.Photo != null ? "http://" + Request.Url.Authority + "/compress/" + item.Photo : null;
