@@ -1,0 +1,241 @@
+﻿@using SL.Util
+@using SL.Data
+@{
+    RequestUtil req = new RequestUtil();
+
+    if (Request["action"] == "search")
+    {
+        Layout = null;
+
+        int page = req.Int("Page", defaultValue: 1);
+        int pageSize = req.Int("PageSize", defaultValue: 10);
+        string keywords = req.String("Keywords");
+        string sort = req.String("Sort");
+        bool isAsc = req.Bool("Asc", defaultValue: false);
+
+        if (req.HasError)
+        {
+            Json.Write(new { success = false, msg = req.FirstError, errors = req.GetErrors() }, Output);
+            return;
+        }
+
+        string where = "1=1";
+        List<object> parameters = new List<object>();
+        if (!string.IsNullOrEmpty(keywords))
+        {
+            where += " and (TypeName like '%'+@p" + parameters.Count + "+'%')";
+            parameters.Add(keywords);
+        }
+
+        IDictionary<string, bool> sortDic = new Dictionary<string, bool>{
+            { string.IsNullOrEmpty(sort) ? "TypeID" : sort, isAsc }
+        };
+
+        int total;
+        var data = SQL.QueryPage("TypeID",
+            "TypeID,TypeName",
+            "CarType",
+            where, page, pageSize, parameters, out total, sortDic);
+
+        Json.Write(new { success = true, data = data, total = total }, Output);
+        return;
+    }
+    else if (Request["action"] == "add")
+    {
+        string typeName = req.String("TypeName", false, "请传入名称");
+
+        if (req.HasError)
+        {
+            Json.Write(new { success = false, msg = req.FirstError, errors = req.GetErrors() }, Output);
+            return;
+        }
+
+        SQL.Execute("insert into CarType (TypeName) values (@p0)", typeName);
+
+        Json.Write(new { success = true }, Output);
+        return;
+    }
+    else if (Request["action"] == "modify")
+    {
+        int typeId = req.Int("TypeID", false, "请传入编号");
+        string typeName = req.String("TypeName", false, "请传入名称");
+
+        if (req.HasError)
+        {
+            Json.Write(new { success = false, msg = req.FirstError, errors = req.GetErrors() }, Output);
+            return;
+        }
+
+        SQL.Execute("update CarType set TypeName=@p1 where TypeID=@p0", typeId, typeName);
+
+        Json.Write(new { success = true }, Output);
+        return;
+    }
+    else if (Request["action"] == "delete")
+    {
+        int typeId = req.Int("TypeID", false, "请传入编号");
+
+        if (req.HasError)
+        {
+            Json.Write(new { success = false, msg = req.FirstError, errors = req.GetErrors() }, Output);
+            return;
+        }
+
+        SQL.Execute("delete from CarType where TypeID=@p0", typeId);
+
+        Json.Write(new { success = true }, Output);
+        return;
+    }
+
+    Layout = "~/Views/Shared/_ManageLayout.cshtml";
+}
+<h1>车型管理</h1>
+<div id="toolbar" class="toolbar"></div>
+<div id="grid"></div>
+<script>
+    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function ($,util,Buttons,popup) {
+
+        //工具栏
+        var buttons=new Buttons('#toolbar',[{
+            ico: "add",
+            value: "添加",
+            click: function () {
+                popupAdd.show();
+            }
+        },{
+            ico: "modify",
+            value: "修改",
+            disabled: true,
+            click: function () {
+                var data=grid.selectedRow().data;
+
+                popupModify.control('typeId').val(data.TypeID);
+                popupModify.control('typeName').val(data.TypeName);
+                popupModify.show();
+            }
+        },{
+            ico: "delete",
+            value: "删除车型",
+            disabled: true,
+            click: function () {
+                var data=grid.selectedRow().data;
+                if(window.confirm('确认删除车型？'))
+                    $.post('?action=delete',{
+                        TypeID: data.TypeID
+                    },function (res) {
+                        if(res.success) {
+                            grid.searchCurrentPage();
+                        } else
+                            alert(res.msg);
+                    },'json');
+            }
+        }]);
+
+        var popupAdd=new popup.Form({
+            title: '添加车型',
+            width: 450,
+            controls: {
+                typeName: {
+                    label: '车型名称',
+                    type: 'text',
+                    width: 260,
+                    validation: {
+                        emptyAble: false,
+                        emptyText: '请填写车型名称'
+                    }
+                }
+            },
+            buttons: [{
+                value: '添加',
+                click: function () {
+                    popupAdd.submit({
+                        url: '?action=add',
+                        success: function (res) {
+                            if(res.success) {
+                                popupAdd.hide().reset();
+                                grid.searchCurrentPage();
+                            } else {
+                                alert(res.msg);
+                            }
+                        }
+                    });
+                }
+            },{
+                value: '取消',
+                click: function () {
+                    popupAdd.hide().reset();
+                }
+            }]
+        });
+
+        var popupModify=new popup.Form({
+            title: '修改车型',
+            width: 450,
+            controls: {
+                typeId: {
+                    type: 'hidden'
+                },
+                typeName: {
+                    label: '车型名称',
+                    type: 'text',
+                    width: 260,
+                    validation: {
+                        emptyAble: false,
+                        emptyText: '请填写车型名称'
+                    }
+                }
+            },
+            buttons: [{
+                value: '修改',
+                click: function () {
+                    popupModify.submit({
+                        url: '?action=modify',
+                        success: function (res) {
+                            if(res.success) {
+                                popupModify.hide().reset();
+                                grid.searchCurrentPage();
+                            } else {
+                                alert(res.msg);
+                            }
+                        }
+                    });
+                }
+            },{
+                value: '取消',
+                click: function () {
+                    popupModify.hide().reset();
+                }
+            }]
+        });
+
+        //列表
+        var grid=$('#grid').grid({
+            search: {
+                url: "?action=search",
+                beforeSend: function () {
+                    buttons.items([1,2]).disable();
+                },
+                data: {
+                    keywords: {
+                        label: "关键字：",
+                        type: 'text'
+                    }
+                }
+            },
+            onRowSelect: function () {
+                buttons.items([1,2]).enable();
+            },
+            pageEnabled: true,
+            columns: [{
+                text: "编号",
+                bind: "TypeID",
+                width: 3
+            },{
+                text: "车型名称",
+                bind: "TypeName",
+                width: 10
+            }]
+        }).search();
+
+    });
+</script>

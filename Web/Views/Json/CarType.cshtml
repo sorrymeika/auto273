@@ -1,0 +1,35 @@
+﻿@{
+    SL.Util.RequestUtil req = new SL.Util.RequestUtil();
+    int page = req.Int("Page", defaultValue: 1);
+    int pageSize = req.Int("PageSize", defaultValue: 10);
+    string keywords = req.String("Keywords");
+    string sort = req.String("Sort");
+    bool isAsc = req.Bool("Asc", defaultValue: true);
+
+    if (req.HasError)
+    {
+        Json.Write(new { success = false, msg = req.FirstError, errors = req.GetErrors() }, Output);
+        return;
+    }
+
+    string where = "1=1";
+    List<object> parameters = new List<object>();
+    if (!string.IsNullOrEmpty(keywords))
+    {
+        where += " and (TypeName like '%'+@p" + parameters.Count + "+'%')";
+        parameters.Add(keywords);
+    }
+
+    IDictionary<string, bool> sortDic = new Dictionary<string, bool>{
+            { string.IsNullOrEmpty(sort) ? "TypeName" : sort, isAsc }
+        };
+
+    int total;
+    var data = SL.Data.SQL.QueryPage("TypeID",
+        "TypeID,TypeName",
+        "CarType",
+        where, page, pageSize, parameters, out total, sortDic);
+
+    Json.Write(new { success = true, data = data, total = total }, Output);
+    return;
+}

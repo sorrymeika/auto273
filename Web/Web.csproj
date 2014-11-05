@@ -139,6 +139,7 @@
     <Content Include="assets\js\views\menu.js" />
     <Content Include="assets\js\views\send.js" />
     <Content Include="assets\js\views\photosave.js" />
+    <Content Include="assets\js\views\carType.js" />
     <Content Include="assets\js\zepto.js" />
     <Content Include="assets\style.css" />
     <Content Include="assets\views\add.html" />
@@ -156,6 +157,7 @@
     <Content Include="assets\views\menu.html" />
     <Content Include="assets\views\send.html" />
     <Content Include="assets\views\photosave.html" />
+    <Content Include="assets\views\carType.html" />
     <Content Include="Global.asax" />
     <Content Include="js\colorpicker\colorpicker.css" />
     <Content Include="js\colorpicker\colorpicker.js" />
@@ -499,6 +501,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Json\Finish.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Manage\Shop\CarType.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Json\CarType.cshtml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

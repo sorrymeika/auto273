@@ -73,3 +73,8 @@ begin
 		set @i=0
 	return @i
 end
+
+create table CarType(
+TypeID int identity primary key,
+TypeName varchar(500)
+)
