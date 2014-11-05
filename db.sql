@@ -62,3 +62,14 @@ Description varchar(200),
 AddTime datetime default GetDate()
 )
 
+create function Equal(@num int,@num1 int)
+returns int
+as
+begin
+	declare @i int
+	if (@num=@num1)
+		set @i=1
+	else
+		set @i=0
+	return @i
+end

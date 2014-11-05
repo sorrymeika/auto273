@@ -1,6 +1,7 @@
 ﻿@using SL.Util
 @{
-    if (!SL.Web.Service.UserService.CheckAuth())
+    int accountid;
+    if (!SL.Web.Service.UserService.CheckAuth(out accountid))
     {
         return;
     }
@@ -37,22 +38,34 @@
             parameters.Add(keywords);
         }
 
-        var data = SL.Data.SQL.QueryPage("TransferID",
-            "AccountID,TransferID,a.ShopID,b.ShopName,PlateNumber,[Type],[Status],CarType,Buyer,BuyerMobile,BuyerAddress,Seller,SellerMobile,SellerAddress,TransferRegion,Price,IsUpload",
-            "[Transfer] a join Shop b on a.ShopID=b.ShopID",
-            where,
-            page,
-            pageSize,
-            parameters,
-            out total);
+        IList<dynamic> data;
 
-        if (data != null)
+        using (SL.Data.Database db = SL.Data.Database.Open())
         {
-            dynamic item;
-            for (int i = 0; i < data.Count; i++)
+
+            data = db.QueryPage("TransferID",
+               "AccountID,TransferID,a.ShopID,b.ShopName,PlateNumber,[Type],[Status],CarType,Buyer,BuyerMobile,BuyerAddress,Seller,SellerMobile,SellerAddress,TransferRegion,Price,IsUpload",
+               "[Transfer] a join Shop b on a.ShopID=b.ShopID",
+               where,
+               page,
+               pageSize,
+               parameters,
+               out total,
+               new Dictionary<string, bool>{
+                { "dbo.Equal(AccountID,"+accountid+")", false }
+               });
+
+            if (data != null)
             {
-                item = data[i];
-                item.Persent = item.IsUpload && item.AccountID != 0 ? "100%" : (item.AccountID != 0 || item.IsUpload) ? "80%" : "60%";
+                dynamic item;
+                for (int i = 0; i < data.Count; i++)
+                {
+                    item = data[i];
+                    item.Photo = db.QueryValue<string>("select top 1 Photo from [Photo] where TransferID=@p0", item.TransferID);
+
+                    item.Photo = item.Photo != null ? "http://" + Request.Url.Authority + "/compress/" + item.Photo : null;
+                    item.Persent = item.Photo != null && item.AccountID != 0 ? "100%" : (item.AccountID != 0 || item.Photo != null) ? "80%" : "60%";
+                }
             }
         }
 
@@ -66,7 +79,9 @@
 
         if (item != null)
         {
-            item.Persent = item.IsUpload && item.AccountID != 0 ? "100%" : (item.AccountID != 0 || item.IsUpload) ? "80%" : "60%";
+            item.Photo = SL.Data.SQL.QueryValue<string>("select top 1 Photo from [Photo] where TransferID=@p0", id);
+            item.Photo = item.Photo != null ? "http://" + Request.Url.Authority + "/compress/" + item.Photo : null;
+            item.Persent = item.Photo != null && item.AccountID != 0 ? "100%" : (item.AccountID != 0 || item.Photo != null) ? "80%" : "60%";
         }
 
         Json.Write(new { success = true, data = item }, Output);

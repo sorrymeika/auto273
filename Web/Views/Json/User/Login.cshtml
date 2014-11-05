@@ -11,7 +11,7 @@
         return;
     }
 
-    var userinfo = SL.Data.SQL.QuerySingle("select AccountID,AccountName,ShopID,Name,Role,Password,Deleted from Account where AccountName=@p0", account);
+    var userinfo = SL.Data.SQL.QuerySingle("select AccountID,AccountName,ShopID,Name,Role,Password,Deleted from Account where AccountName=@p0 and Role=@p1", account, role);
     if (null == userinfo)
     {
         Json.Write(new { success = false, msg = "账号不存在", account = account }, Output);

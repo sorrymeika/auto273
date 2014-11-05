@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\anim.css" />
+    <Content Include="assets\index1.html" />
     <Content Include="assets\images\dataloading.png" />
     <Content Include="assets\images\imgbg.png" />
     <Content Include="assets\images\launch.png" />
@@ -495,6 +496,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Json\GetUpload.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Json\Finish.cshtml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

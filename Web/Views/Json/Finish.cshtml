@@ -17,7 +17,7 @@
         return;
     }
 
-    SQL.Execute("delete from [Transfer] where AccountID=@p0 and TransferID=@p1", accountId, transferId);
+    SQL.Execute("update [Transfer] set [Status]=1 where AccountID=@p0 and TransferID=@p1", accountId, transferId);
 
     Json.Write(new { success = true }, Output);
     return;

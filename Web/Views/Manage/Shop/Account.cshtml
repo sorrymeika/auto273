@@ -78,7 +78,7 @@
     else if (Request["action"] == "modify")
     {
         int accountId = req.Int("AccountID", false, "请传入账号编号");
-        int shopId = req.Int("ShopID", false, "请传入门店编号");
+        int shopId = req.Int("ShopID");
         string name = req.String("Name", false, "请传入名称");
         string password = req.String("Password");
 
@@ -133,15 +133,15 @@
 var shops=@(new MvcHtmlString(Json.Encode(shops)));
 </script>
 <script>
-    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function ($,util,Buttons,popup) {
+    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function($,util,Buttons,popup) {
 
         //工具栏
         var buttons=new Buttons('#toolbar',[{
             ico: "add",
             value: "添加",
-            click: function () {
+            click: function() {
                 popupAdd.control('role').val()==1?
-                    popupAdd.control('shopId').show():
+                    popupAdd.control('shopId').hide():
                     popupAdd.control('shopId').hide();
 
                 popupAdd.show();
@@ -150,14 +150,14 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
             ico: "modify",
             value: "修改",
             disabled: true,
-            click: function () {
+            click: function() {
                 var data=grid.selectedRow().data;
 
                 popupModify.control('name').val(data.Name);
                 popupModify.control('shopId').val(data.ShopID);
                 (data.Role==0)
                     ?popupModify.control('shopId').hide()
-                    :popupModify.control('shopId').show();
+                    :popupModify.control('shopId').hide();
 
                 popupModify.control('accountId').val(data.AccountID);
                 popupModify.show();
@@ -166,12 +166,12 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
             ico: "delete",
             value: "停用账号",
             disabled: true,
-            click: function () {
+            click: function() {
                 var data=grid.selectedRow().data;
                 if(window.confirm('确认停用账号？'))
                     $.post('?action=delete',{
                         AccountID: data.AccountID
-                    },function (res) {
+                    },function(res) {
                         if(res.success) {
                             grid.searchCurrentPage();
                         } else
@@ -223,9 +223,9 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                         text: '商户'
                     }],
                     events: {
-                        'change': function (e) {
+                        'change': function(e) {
                             $(e.target).val()==1?
-                                popupAdd.control('shopId').show():
+                                popupAdd.control('shopId').hide():
                                 popupAdd.control('shopId').hide();
                         }
                     }
@@ -233,16 +233,17 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 shopId: {
                     label: '所属门店',
                     type: 'select',
+                    visible: false,
                     emptyAble: false,
                     options: shops
                 }
             },
             buttons: [{
                 value: '添加',
-                click: function () {
+                click: function() {
                     popupAdd.submit({
                         url: '?action=add',
-                        success: function (res) {
+                        success: function(res) {
                             if(res.success) {
                                 popupAdd.hide().reset();
                                 grid.searchCurrentPage();
@@ -254,7 +255,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 }
             },{
                 value: '取消',
-                click: function () {
+                click: function() {
                     popupAdd.hide().reset();
                 }
             }]
@@ -290,10 +291,10 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
             },
             buttons: [{
                 value: '修改',
-                click: function () {
+                click: function() {
                     popupModify.submit({
                         url: '?action=modify',
-                        success: function (res) {
+                        success: function(res) {
                             if(res.success) {
                                 popupModify.hide().reset();
                                 grid.searchCurrentPage();
@@ -305,7 +306,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 }
             },{
                 value: '取消',
-                click: function () {
+                click: function() {
                     popupModify.hide().reset();
                 }
             }]
@@ -315,7 +316,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
         var grid=$('#grid').grid({
             search: {
                 url: "?action=search",
-                beforeSend: function () {
+                beforeSend: function() {
                     buttons.items([1,2]).disable();
                 },
                 data: {
@@ -344,7 +345,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                     }
                 }
             },
-            onRowSelect: function () {
+            onRowSelect: function() {
                 buttons.items([1,2]).enable();
             },
             pageEnabled: true,
@@ -364,14 +365,14 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 text: "类型",
                 bind: "Role",
                 width: 6,
-                render: function (cell,data) {
+                render: function(cell,data) {
                     cell.append('<i class="gridCellItem">'+(data.Role==0?'商户':"业务员")+'</i>');
                 }
             },{
                 text: "查看",
                 bind: "Role",
                 width: 6,
-                render: function (cell,data) {
+                render: function(cell,data) {
                     cell.append('<i class="gridCellItem"><a href="Transfer?accountid='+data.AccountID+'" style="color:#c00">[下属过户单]</a></i>');
                 }
             }]
