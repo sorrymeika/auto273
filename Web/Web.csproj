@@ -108,6 +108,7 @@
     <Content Include="assets\js\sl\widget\imglazyload.js" />
     <Content Include="assets\js\sl\widget\loading.js" />
     <Content Include="assets\js\sl\widget\waterfall.js" />
+    <Content Include="assets\js\sl\store.js" />
     <Content Include="assets\js\tmpl.js" />
     <Content Include="assets\js\ui\animation.js" />
     <Content Include="assets\js\ui\dialog.js" />

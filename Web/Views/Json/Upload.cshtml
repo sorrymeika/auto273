@@ -10,6 +10,7 @@
     RequestUtil req = new RequestUtil();
 
     int transferId = req.Int("TransferID", false, "缺少单据编号");
+    int type = req.Int("Type", false, "缺少类型");
     var photo = req.File("Photo", false, "请上传图片");
     var description = req.String("Description", false, "请填写描述");
 
@@ -21,8 +22,10 @@
 
     var src = photo.Save();
 
-    SL.Data.SQL.Execute("insert into [Photo] (AccountID,TransferID,Photo,Description) values (@p0,@p1,@p2,@p3)", accountId, transferId, src, description);
+    int photoId;
 
-    Json.Write(new { success = true, src = src }, Output);
+    SL.Data.SQL.Execute("insert into [Photo] (AccountID,TransferID,Photo,Description,[Type]) values (@p0,@p1,@p2,@p3,@p4)", out photoId, accountId, transferId, src, description, type);
+
+    Json.Write(new { success = true, photoId = photoId, src = RequestFile.GetCompressedImageSrc(src) }, Output);
     return;
 }

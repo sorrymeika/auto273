@@ -16,7 +16,7 @@
         string keywords = req.String("keywords");
 
         string where = "b.Deleted=0";
-        IList<string> parameters = new List<string>();
+        IList<object> parameters = new List<object>();
         int total;
 
         if (type == 1)
@@ -31,11 +31,31 @@
         {
             where += "and [Status]=1";
         }
+        var account = SL.Data.SQL.QuerySingle("select Role,ShopID from Account where AccountID=@p0", accountid);
 
-        if (!string.IsNullOrEmpty(keywords))
+        if (account.Role == 0)
         {
-            where += "and [PlateNumber] like '%'+@p" + parameters.Count + "+'%'";
-            parameters.Add(keywords);
+            if (!string.IsNullOrEmpty(keywords))
+            {
+                where += "and [PlateNumber]=@p" + parameters.Count;
+                parameters.Add(keywords);
+            }
+
+            where += "and a.ShopID=@p" + parameters.Count;
+            parameters.Add((int)account.ShopID);
+        }
+        else
+        {
+            if (!string.IsNullOrEmpty(keywords))
+            {
+                where += "and [PlateNumber]=@p" + parameters.Count;
+                parameters.Add(keywords);
+            }
+            else
+            {
+                where += "and AccountID=@p" + parameters.Count;
+                parameters.Add(accountid);
+            }
         }
 
         IList<dynamic> data;
@@ -45,7 +65,7 @@
 
             data = db.QueryPage("TransferID",
                "AccountID,TransferID,a.ShopID,b.ShopName,PlateNumber,[Type],[Status],CarType,Buyer,BuyerMobile,BuyerAddress,Seller,SellerMobile,SellerAddress,TransferRegion,Price,IsUpload",
-               "[Transfer] a join Shop b on a.ShopID=b.ShopID",
+               "[Transfer] a left join Shop b on a.ShopID=b.ShopID",
                where,
                page,
                pageSize,
@@ -58,14 +78,29 @@
             if (data != null)
             {
                 dynamic item;
+                String url = "http://" + Request.Url.Authority + "/compress/";
                 for (int i = 0; i < data.Count; i++)
                 {
                     item = data[i];
                     item.IsMine = item.AccountID == accountid;
-                    item.Photo = db.QueryValue<string>("select top 1 Photo from [Photo] where TransferID=@p0", item.TransferID);
+                    IList<dynamic> photos = db.Query("select [Type],Photo from [Photo] where TransferID=@p0", (int)item.TransferID);
+                    if (photos != null)
+                    {
+                        item.Photo1 = photos.FirstOrDefault(a => a.Type == 1);
+                        item.Photo2 = photos.FirstOrDefault(a => a.Type == 2);
+                        item.Photo3 = photos.FirstOrDefault(a => a.Type == 3);
+                        item.Photo4 = photos.FirstOrDefault(a => a.Type == 4);
+                        item.Photo5 = photos.FirstOrDefault(a => a.Type == 5);
+                    }
 
-                    item.Photo = item.Photo != null ? "http://" + Request.Url.Authority + "/compress/" + item.Photo : null;
-                    item.Persent = item.Photo != null && item.AccountID != 0 ? "100%" : (item.AccountID != 0 || item.Photo != null) ? "80%" : "60%";
+                    item.Photo1 = item.Photo1 != null ? url + item.Photo1 : null;
+                    item.Photo2 = item.Photo2 != null ? url + item.Photo2 : null;
+                    item.Photo3 = item.Photo3 != null ? url + item.Photo3 : null;
+                    item.Photo4 = item.Photo4 != null ? url + item.Photo4 : null;
+                    item.Photo5 = item.Photo5 != null ? url + item.Photo5 : null;
+
+                    var hasPhoto = !string.IsNullOrEmpty(item.Photo1) && !string.IsNullOrEmpty(item.Photo2) && !string.IsNullOrEmpty(item.Photo3) && !string.IsNullOrEmpty(item.Photo4) && !string.IsNullOrEmpty(item.Photo5);
+                    item.Persent = hasPhoto && item.AccountID != 0 && item.Seller != null && item.Buyer != null ? "100%" : "50%";
                 }
             }
         }
@@ -80,9 +115,25 @@
 
         if (item != null)
         {
-            item.Photo = SL.Data.SQL.QueryValue<string>("select top 1 Photo from [Photo] where TransferID=@p0", id);
-            item.Photo = item.Photo != null ? "http://" + Request.Url.Authority + "/compress/" + item.Photo : null;
-            item.Persent = item.Photo != null && item.AccountID != 0 ? "100%" : (item.AccountID != 0 || item.Photo != null) ? "80%" : "60%";
+            String url = "http://" + Request.Url.Authority + "/compress/";
+            IList<dynamic> photos = SL.Data.SQL.Query("select [Type],Photo from [Photo] where TransferID=@p0", (int)item.TransferID);
+            if (photos != null)
+            {
+                item.Photo1 = photos.FirstOrDefault(a => a.Type == 1);
+                item.Photo2 = photos.FirstOrDefault(a => a.Type == 2);
+                item.Photo3 = photos.FirstOrDefault(a => a.Type == 3);
+                item.Photo4 = photos.FirstOrDefault(a => a.Type == 4);
+                item.Photo5 = photos.FirstOrDefault(a => a.Type == 5);
+            }
+
+            item.Photo1 = item.Photo1 != null ? url + item.Photo1 : null;
+            item.Photo2 = item.Photo2 != null ? url + item.Photo2 : null;
+            item.Photo3 = item.Photo3 != null ? url + item.Photo3 : null;
+            item.Photo4 = item.Photo4 != null ? url + item.Photo4 : null;
+            item.Photo5 = item.Photo5 != null ? url + item.Photo5 : null;
+
+            var hasPhoto = !string.IsNullOrEmpty(item.Photo1) && !string.IsNullOrEmpty(item.Photo2) && !string.IsNullOrEmpty(item.Photo3) && !string.IsNullOrEmpty(item.Photo4) && !string.IsNullOrEmpty(item.Photo5);
+            item.Persent = hasPhoto && item.AccountID != 0 && item.Seller != null && item.Buyer != null ? "100%" : "50%";
         }
 
         Json.Write(new { success = true, data = item }, Output);
