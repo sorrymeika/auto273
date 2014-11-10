@@ -57,11 +57,32 @@
 
         if (data != null)
         {
-            dynamic item;
-            for (int i = 0; i < data.Count; i++)
+            using (SL.Data.Database db = SL.Data.Database.Open())
             {
-                item = data[i];
-                item.Persent = item.IsUpload && item.AccountID != 0 ? "100%" : (item.AccountID != 0 || item.IsUpload) ? "80%" : "60%";
+                dynamic item;
+                String url = "http://" + Request.Url.Authority + "/compress/";
+                for (int i = 0; i < data.Count; i++)
+                {
+                    item = data[i];
+                    IList<dynamic> photos = db.Query("select [Type],Photo from [Photo] where TransferID=@p0", (int)item.TransferID);
+                    if (photos != null)
+                    {
+                        item.Photo1 = photos.FirstOrDefault(a => a.Type == 1);
+                        item.Photo2 = photos.FirstOrDefault(a => a.Type == 2);
+                        item.Photo3 = photos.FirstOrDefault(a => a.Type == 3);
+                        item.Photo4 = photos.FirstOrDefault(a => a.Type == 4);
+                        item.Photo5 = photos.FirstOrDefault(a => a.Type == 5);
+                    }
+
+                    item.Photo1 = item.Photo1 != null ? url + item.Photo1 : null;
+                    item.Photo2 = item.Photo2 != null ? url + item.Photo2 : null;
+                    item.Photo3 = item.Photo3 != null ? url + item.Photo3 : null;
+                    item.Photo4 = item.Photo4 != null ? url + item.Photo4 : null;
+                    item.Photo5 = item.Photo5 != null ? url + item.Photo5 : null;
+
+                    var hasPhoto = !string.IsNullOrEmpty(item.Photo1) && !string.IsNullOrEmpty(item.Photo2) && !string.IsNullOrEmpty(item.Photo3) && !string.IsNullOrEmpty(item.Photo4) && !string.IsNullOrEmpty(item.Photo5);
+                    item.Persent = hasPhoto && item.AccountID != 0 && item.Seller != null && item.Buyer != null ? "100%" : "50%";
+                }
             }
         }
 
@@ -88,13 +109,13 @@
 var shops=@(new MvcHtmlString(Json.Encode(shops)));
 </script>
 <script>
-    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function($,util,Buttons,popup) {
+    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function ($,util,Buttons,popup) {
 
         //工具栏
         var buttons=new Buttons('#toolbar',[{
             ico: "modify",
             value: "查看详情",
-            click: function() {
+            click: function () {
                 var data=grid.selectedRow().data;
                 popupAdd.control('id').html(data.TransferID);
                 popupAdd.control('type').html(data.Type==0?"过户":"转籍");
@@ -111,6 +132,11 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 popupAdd.control('sellerAddress').html(data.SellerAddress);
                 popupAdd.control('transferRegion').html(data.TransferRegion);
                 popupAdd.control('addTime').html(util.formatDate(data.AddTime));
+                popupAdd.control('photo1').html('<img width=120 heght=120 src="'+data.Photo1+'"/>');
+                popupAdd.control('photo2').html('<img width=120 heght=120 src="'+data.Photo2+'"/>');
+                popupAdd.control('photo3').html('<img width=120 heght=120 src="'+data.Photo3+'"/>');
+                popupAdd.control('photo4').html('<img width=120 heght=120 src="'+data.Photo4+'"/>');
+                popupAdd.control('photo5').html('<img width=120 heght=120 src="'+data.Photo5+'"/>');
 
                 popupAdd.show();
             }
@@ -193,11 +219,36 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                     label: '添加日期：',
                     type: 'label',
                     width: 260
+                },
+                photo1: {
+                    label: '行驶证：',
+                    type: 'label',
+                    width: 260
+                },
+                photo2: {
+                    label: '保险单：',
+                    type: 'label',
+                    width: 260
+                },
+                photo3: {
+                    label: '产权证：',
+                    type: 'label',
+                    width: 260
+                },
+                photo4: {
+                    label: '买方身份证：',
+                    type: 'label',
+                    width: 260
+                },
+                photo5: {
+                    label: '卖方身份证：',
+                    type: 'label',
+                    width: 260
                 }
             },
             buttons: [{
                 value: '关闭',
-                click: function() {
+                click: function () {
                     popupAdd.hide();
                 }
             }]
@@ -207,7 +258,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
         var grid=$('#grid').grid({
             search: {
                 url: "?action=search",
-                beforeSend: function() {
+                beforeSend: function () {
                     buttons.items(0).disable();
                 },
                 data: {
@@ -250,7 +301,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                     }
                 }
             },
-            onRowSelect: function() {
+            onRowSelect: function () {
                 buttons.items(0).enable();
             },
             pageEnabled: true,
@@ -274,14 +325,14 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 text: "类型",
                 bind: "Type",
                 width: 6,
-                render: function(cell,data) {
+                render: function (cell,data) {
                     cell.append('<i class="gridCellItem">'+(data.Type==0?'过户':"转籍")+'</i>');
                 }
             },{
                 text: "状态",
                 bind: "Status",
                 width: 6,
-                render: function(cell,data) {
+                render: function (cell,data) {
                     cell.append('<i class="gridCellItem">'+(data.Status==0?'待补':"完成")+'</i>');
                 }
             }]

@@ -74,5 +74,7 @@ begin
 	return @i
 end
 
-
-select * from [Transfer] order by dbo.Equal(AccountID,1) desc
+create table CarType(
+TypeID int identity primary key,
+TypeName varchar(500)
+)

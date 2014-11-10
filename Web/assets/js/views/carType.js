@@ -5,10 +5,11 @@
         Loading=require('sl/widget/loading');
 
     module.exports=sl.Activity.extend({
-        template: 'views/send.html',
+        template: 'views/carType.html',
         events: {
             'tap .js_list li': 'check',
-            'tap .js_save': 'save'
+            'tap .js_save': 'save',
+            'tap .js_back': 'back'
         },
         onCreate: function () {
             var that=this;
@@ -19,10 +20,9 @@
             var userinfo=JSON.parse(localStorage.getItem('USERINFO'));
 
             that.loading.load({
-                url: '/json/user',
+                url: '/json/carType',
                 pageSize: 100,
                 data: {
-                    role: 1,
                     auth: userinfo.Auth,
                     account: userinfo.AccountName
                 },
@@ -59,43 +59,15 @@
         save: function () {
             var that=this,
                 $check=this.$list.find('.check'),
-                accountId=$check.attr('data-id');
+                id=$check.attr('data-id');
 
-            if(!accountId) {
-                sl.tip("请选择派单人");
+            if(!id) {
+                sl.tip("请选择车型");
                 return;
             }
 
-            if(!that.route.data.id) {
-                that.setResult('sendSelect',accountId);
-                that.back();
-                return;
-            }
-
-            var userinfo=JSON.parse(localStorage.getItem('USERINFO'));
-
-            that.loading.load({
-                url: '/json/send',
-                checkData: false,
-                data: {
-                    transferId: that.route.data.id,
-                    accountId: accountId,
-                    auth: userinfo.Auth,
-                    account: userinfo.AccountName
-                },
-                success: function (res) {
-                    this.hideLoading();
-                    sl.tip("派单成功");
-
-                    that.setResult('sendSuccess',res);
-                    that.back('/');
-                },
-                error: function (res) {
-                    this.hideLoading();
-                    sl.tip(res.msg);
-                }
-            });
-
+            that.setResult('carTypeChange',$check.html());
+            that.back();
 
         }
 

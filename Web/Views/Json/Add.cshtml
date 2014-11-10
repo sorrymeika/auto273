@@ -1,24 +1,56 @@
 ﻿@using SL.Util
 @{
-    if (!SL.Web.Service.UserService.CheckAuth())
+    int accountid;
+    if (!SL.Web.Service.UserService.CheckAuth(out accountid))
     {
         return;
     }
 
+    var account = SL.Data.SQL.QuerySingle("select Role,ShopID from Account where AccountID=@p0", accountid);
+    int accountId;
+    int shopId;
+    string carType = null;
+    string buyer = null;
+    string buyerMobile = null;
+    string buyerAddress = null;
+    string seller = null;
+    string sellerMobile = null;
+    string sellerAddress = null;
+    bool uploadEmpty;
+
     RequestUtil req = new RequestUtil();
 
-    int accountId = SL.Web.Service.UserService.GetAccountID(req.String("account"));
-    int shopId = req.Int("shopId", false, "请选择门店");
     string plateNumber = req.String("plateNumber", false, "请填写车牌号");
-    int type = req.Int("type", false, "请填写车牌号");
-    string carType = req.String("CarType", false, "请填写CarType");
-    string buyer = req.String("name", false, "请填写Buyer");
-    string buyerMobile = req.String("mobile", false, "请填写BuyerMobile");
-    string buyerAddress = req.String("address", false, "请填写BuyerAddress");
+    int type = req.Int("type", false, "请选择类型");
 
-    string seller = req.String("seller", false, "请填写Seller");
-    string sellerMobile = req.String("sellerMobile", false, "请填写SellerMobile");
-    string sellerAddress = req.String("sellerAddress", false, "请填写SellerAddress");
+    if (account.Role == 0)
+    {
+        shopId = account.ShopID;
+        accountId = req.Int("accountId");
+        uploadEmpty = true;
+
+        carType = req.String("CarType", false, "请填写CarType");
+        buyer = req.String("name", false, "请填写Buyer");
+        buyerMobile = req.String("mobile", false, "请填写BuyerMobile");
+        buyerAddress = req.String("address", false, "请填写BuyerAddress");
+
+        seller = req.String("seller", false, "请填写Seller");
+        sellerMobile = req.String("sellerMobile", false, "请填写SellerMobile");
+        sellerAddress = req.String("sellerAddress", false, "请填写SellerAddress");
+    }
+    else
+    {
+        shopId = req.Int("shopId", false, "请选择门店");
+        uploadEmpty = false;
+        accountId = accountid;
+    }
+
+    String[] photos = new String[5];
+    photos[0] = req.String("typePhoto1", uploadEmpty, "请上传图片", @"^\d+(,\d+){0,}$", "photo error");
+    photos[1] = req.String("typePhoto2", uploadEmpty, "请上传图片", @"^\d+(,\d+){0,}$", "photo error");
+    photos[2] = req.String("typePhoto3", uploadEmpty, "请上传图片", @"^\d+(,\d+){0,}$", "photo error");
+    photos[3] = req.String("typePhoto4", uploadEmpty, "请上传图片", @"^\d+(,\d+){0,}$", "photo error");
+    photos[4] = req.String("typePhoto5", uploadEmpty, "请上传图片", @"^\d+(,\d+){0,}$", "photo error");
 
     string transferRegion = req.String("region");
     decimal price = req.Decimal("price");
@@ -29,8 +61,29 @@
         return;
     }
 
-    SL.Data.SQL.Execute("insert into [Transfer] (AccountID,ShopID,PlateNumber,[Type],[Status],CarType,Buyer,BuyerMobile,BuyerAddress,Seller,SellerMobile,SellerAddress,TransferRegion,Price,AddTime) values (@p0,@p1,@p2,@p3,0,@p4,@p5,@p6,@p7,@p8,@p9,@p10,@p11,@p12,GetDate())", 0, shopId, plateNumber, type, carType, buyer, buyerMobile, buyerAddress, seller, sellerMobile, sellerAddress, transferRegion, price);
 
+    int transferId;
+
+    using (SL.Data.Database db = SL.Data.Database.Open())
+    {
+        db.Execute("insert into [Transfer] (AccountID,ShopID,PlateNumber,[Type],[Status],CarType,Buyer,BuyerMobile,BuyerAddress,Seller,SellerMobile,SellerAddress,TransferRegion,Price,AddTime) values (@p0,@p1,@p2,@p3,0,@p4,@p5,@p6,@p7,@p8,@p9,@p10,@p11,@p12,GetDate())", out transferId, accountId, shopId, plateNumber, type, carType, buyer, buyerMobile, buyerAddress, seller, sellerMobile, sellerAddress, transferRegion, price);
+
+        string strPhotos = "";
+        photos.All(a =>
+        {
+            if (!string.IsNullOrEmpty(a))
+            {
+                strPhotos += a + ",";
+            }
+            return true;
+        });
+        strPhotos = strPhotos.Trim(',');
+        if (!string.IsNullOrEmpty(strPhotos))
+        {
+            db.Execute("update Photo set TransferID=@p0 where PhotoID in (" + String.Join(",", photos) + ")", transferId);
+        }
+
+    }
     Json.Write(new { success = true }, Output);
     return;
 }

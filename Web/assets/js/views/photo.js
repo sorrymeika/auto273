@@ -23,59 +23,10 @@
 
             that.$list=that.$('.js_list');
 
-            that.listenResult("photoSave",function(e,data) {
-                var checked=that.$list.find('li.check'),
-                    length=checked.length,
-                    i=0,
-                    photo,
-                    error=0;
-
-                if(length==0) {
-                    sl.tip('请至少选择一张图片');
-                    return;
-                }
-
-                !that.loading&&(that.loading=new Loading(that.$el));
-                that.loading.showLoading();
-
-                var userinfo=JSON.parse(localStorage.getItem('USERINFO'));
-
-
-                var post=function() {
-                    if(i<length) {
-                        photo=checked.eq(i).data('path');
-
-                        app.post('/json/upload',{
-                            TransferID: that.route.data.id,
-                            Description: data,
-                            auth: userinfo.Auth,
-                            account: userinfo.AccountName
-                        },{
-                            Photo: photo
-                        },function(res) {
-                            if(res&&res.success) {
-                            } else {
-                                error++
-                            }
-
-                            post();
-                        });
-                    } else {
-                        sl.tip(error==0?"全部图片上传成功！":((length-error)+"张成功,"+error+"张失败！"));
-                        that.loading.hideLoading();
-                    }
-                    i++;
-                };
-
-                post();
-            });
-
-            that.imgLazyload=new ImgLazyload(that.$('.js_lazy[data-url]').removeClass('js_lazy'));
-
-            app.queryThumbnailList(function(res) {
-                //that.$list.append(that.tmpl('list',{ data: res }));
-            });
-
+            //that.imgLazyload=new ImgLazyload(that.$('.js_lazy[data-url]').removeClass('js_lazy'));
+            //app.queryThumbnailList(function (res) {
+            //that.$list.append(that.tmpl('list',{ data: res }));
+            //});
         },
         onStart: function() {
         },
@@ -88,7 +39,7 @@
         },
         onDestory: function() {
             this.loading&&this.loading.destory();
-            this.imgLazyload&&this.imgLazyload.destory();
+            //this.imgLazyload&&this.imgLazyload.destory();
         },
 
         check: function(e) {
@@ -103,7 +54,62 @@
                 sl.tip('请至少选择一张图片');
                 return;
             }
-            this.forward('/photosave.html');
+            this.upload();
+        },
+
+        upload: function() {
+            var that=this,
+                checked=that.$list.find('li.check'),
+                length=checked.length,
+                i=0,
+                photo,
+                error=0;
+
+            if(length==0) {
+                sl.tip('请至少选择一张图片');
+                return;
+            }
+
+            !that.loading&&(that.loading=new Loading(that.$el));
+            that.loading.showLoading();
+
+            var userinfo=JSON.parse(localStorage.getItem('USERINFO')),
+                photoType=parseInt(that.route.data.type),
+                desc=["行驶证","保险单","产权证","买方身份证","卖方身份证"][photoType-1],
+                results=[],
+                src,
+                post=function() {
+                    if(i<length) {
+                        photo=checked.eq(i).data('path');
+
+                        app.post('/json/upload',{
+                            TransferID: that.route.data.id||0,
+                            Type: photoType,
+                            Description: desc,
+                            auth: userinfo.Auth,
+                            account: userinfo.AccountName
+                        },{
+                            Photo: photo
+                        },function(res) {
+                            if(res&&res.success) {
+                                results.push(res.photoId);
+                                src=res.src;
+                            } else {
+                                error++
+                            }
+
+                            post();
+                        });
+                    } else {
+                        sl.tip(error==0?"全部图片上传成功！":((length-error)+"张成功,"+error+"张失败！"));
+                        that.loading.hideLoading();
+                        that.setResult("photoChange",photoType,src,results);
+                        that.back();
+                    }
+                    i++;
+                };
+
+            post();
         },
 
         _appendImage: function(res) {
@@ -115,22 +121,16 @@
 
         takePhoto: function() {
             var that=this;
-
-            sl.confirm('请上传车辆的产权证、行驶证、身份证照片',function() {
-                app.takePhoto(function(res) {
-                    that._appendImage(res);
-                });
+            app.takePhoto(function(res) {
+                that._appendImage(res);
             });
-
 
         },
 
         pickImage: function() {
             var that=this;
-            sl.confirm('请上传车辆的产权证、行驶证、身份证照片',function() {
-                app.pickImage(function(res) {
-                    that._appendImage(res);
-                });
+            app.pickImage(function(res) {
+                that._appendImage(res);
             });
         }
 

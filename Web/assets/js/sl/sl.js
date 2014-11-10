@@ -7,6 +7,7 @@
         tmpl=require('./tmpl'),
         view=require('./view'),
         style=require('./style'),
+        store=require('./store'),
         plugin=require('./plugins/template');
 
     var noop=sl.noop,
@@ -354,7 +355,7 @@
         options: {
             route: null
         },
-        useAnimation: !/Android\s2/.test(navigator.userAgent),
+        useAnimation: true,//,!/Android\s2/.test(navigator.userAgent),
         animationName: null,
         application: null,
         el: '<div class="view"></div>',
@@ -409,8 +410,9 @@
             this.listenTo(this.application,event,f);
         },
 
-        setResult: function(event,data) {
-            this.application.trigger(event,data);
+        setResult: function() {
+            var args=slice.call(arguments);
+            this.application.trigger.apply(this.application,args);
         },
 
         isPrepareExitAnimation: false,
@@ -707,6 +709,7 @@
             this.text(actionName).show(3000);
         }),
         common: {},
+        store: store,
         noop: noop,
         simplelize: simplelize
     });

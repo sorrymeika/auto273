@@ -1,4 +1,4 @@
-﻿define(['$','sl/sl','app','sl/widget/loading'],function(require,exports,module) {
+﻿define(['$','sl/sl','app','sl/widget/loading'],function (require,exports,module) {
     var $=require('$'),
         sl=require('sl/sl'),
         Loading=require('sl/widget/loading'),
@@ -10,7 +10,7 @@
             'tap .js_save': 'save',
             'tap .js_img': 'photo'
         },
-        onCreate: function() {
+        onCreate: function () {
             var that=this;
 
             that.$('.js_type').html(that.route.data.type==0?"过户":"转籍");
@@ -20,17 +20,22 @@
                 that.$('.js_prize_bd').hide();
             } else {
                 that.$('.js_region').hide();
-                that.$('.js_prize_bd').show();
+                that.$('.js_prize_bd')[_ACCOUNT_TYPE==1?'hide':'show']();
             }
+            that.$('.js_c')[_ACCOUNT_TYPE==0?'hide':'show']();
+            that.$('.js_s')[_ACCOUNT_TYPE==1?'hide':'show']();
 
-            that.listenResult("shopChange",function(e,data) {
+            that.listenResult("shopChange",function (e,data) {
                 that.$('.js_shop').html(data.shopName);
             });
-            that.listenResult("buyerChange",function(e,data) {
+            that.listenResult("buyerChange",function (e,data) {
                 that.$('.js_buyer').html(data.name);
             });
-            that.listenResult("sellerChange",function(e,data) {
+            that.listenResult("sellerChange",function (e,data) {
                 that.$('.js_seller').html(data.name);
+            });
+            that.listenResult('carTypeChange',function (e,data) {
+                that.$('.js_car_type').val(data);
             });
 
             var userinfo=JSON.parse(localStorage.getItem('USERINFO'));
@@ -44,12 +49,16 @@
                     id: that.route.data.id
                 },
                 checkData: false,
-                success: function(res) {
+                success: function (res) {
                     this.hideLoading();
 
                     var data=res.data;
                     that.$('.js_plate_number').val(res.data.PlateNumber);
-                    that.$('.js_img img').attr('src',res.data.Photo);
+                    that.$('[data-upload="1"] .js_img img').attr('src',res.data.Photo1);
+                    that.$('[data-upload="2"] .js_img img').attr('src',res.data.Photo2);
+                    that.$('[data-upload="3"] .js_img img').attr('src',res.data.Photo3);
+                    that.$('[data-upload="4"] .js_img img').attr('src',res.data.Photo4);
+                    that.$('[data-upload="5"] .js_img img').attr('src',res.data.Photo5);
 
                     that.$('.js_price').val(res.data.Price);
                     that.$('.js_car_type').val(res.data.CarType);
@@ -58,33 +67,35 @@
                     that.$('.js_buyer').html(data.Buyer);
                     that.$('.js_seller').html(data.Seller);
 
+                    that.accountId=res.data.AccountID;
+
                     sl.common.shopInfo={ shopId: res.data.ShopID,shopName: res.data.ShopName };
                     sl.common.buyerInfo={ name: data.Buyer,mobile: data.BuyerMobile,address: data.BuyerAddress };
                     sl.common.sellerInfo={ name: data.Seller,mobile: data.SellerMobile,address: data.SellerAddress };
                 },
-                error: function(res) {
+                error: function (res) {
                     this.hideLoading();
                     sl.tip(res.msg);
                 }
             });
         },
-        onStart: function() {
+        onStart: function () {
         },
-        onResume: function() {
+        onResume: function () {
         },
-        onShow: function() {
+        onShow: function () {
             if(!localStorage.getItem('USERINFO')) {
                 this.back('/login.html');
             }
         },
-        onDestory: function() {
+        onDestory: function () {
             sl.common.shopInfo=null;
             sl.common.buyerInfo=null;
             sl.common.sellerInfo=null;
             this.loading&&this.loading.destory();
         },
 
-        save: function() {
+        save: function () {
             var that=this,
                 sellerInfo=sl.common.sellerInfo,
                 data={
@@ -98,27 +109,34 @@
                 sl.tip("请填写车牌号");
                 return;
             }
-            if(!data.carType) {
-                sl.tip("请填写车型");
-                return;
-            }
             if(that.route.data.type==1&&!data.region) {
                 sl.tip("请填写转籍地");
                 return;
             }
 
-            if(!sl.common.buyerInfo) {
-                sl.tip("请填写买方联系方式");
-                return;
+            if(_ACCOUNT_TYPE==0) {
+                if(!data.carType) {
+                    sl.tip("请填写车型");
+                    return;
+                }
+                if(!sl.common.buyerInfo) {
+                    sl.tip("请填写买方联系方式");
+                    return;
+                }
+                if(!sellerInfo) {
+                    sl.tip("请填写卖方联系方式");
+                    return;
+                }
+
+                data.accountId=that.accountId;
+
+            } else {
+                if(!sl.common.shopInfo) {
+                    sl.tip("请选择门店");
+                    return;
+                }
             }
-            if(!sellerInfo) {
-                sl.tip("请填写卖方联系方式");
-                return;
-            }
-            if(!sl.common.shopInfo) {
-                sl.tip("请选择门店");
-                return;
-            }
+
             $.extend(data,sl.common.buyerInfo,sl.common.shopInfo);
 
             var userinfo=JSON.parse(localStorage.getItem('USERINFO'));
@@ -137,13 +155,13 @@
                 type: 'POST',
                 checkData: false,
                 data: data,
-                success: function(res) {
+                success: function (res) {
                     this.hideLoading();
 
                     that.setResult('addSuccess');
                     that.back('/');
                 },
-                error: function(res) {
+                error: function (res) {
                     this.hideLoading();
                     sl.tip(res.msg);
                 }
@@ -151,7 +169,7 @@
 
         },
 
-        photo: function() {
+        photo: function () {
             this.forward('/photo/'+this.route.data.id+'.html');
         }
 
