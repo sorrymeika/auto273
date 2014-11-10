@@ -72,7 +72,8 @@
                parameters,
                out total,
                new Dictionary<string, bool>{
-                { "dbo.Equal(AccountID,"+accountid+")", false }
+                { "dbo.Equal(AccountID,"+accountid+")", false },
+                { "TransferID", false }
                });
 
             if (data != null)

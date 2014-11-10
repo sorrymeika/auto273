@@ -78,3 +78,6 @@ create table CarType(
 TypeID int identity primary key,
 TypeName varchar(500)
 )
+
+--2014/11/09
+alter table Photo add [Type] int
