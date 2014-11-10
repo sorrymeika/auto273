@@ -9,6 +9,12 @@
         template: 'views/add.html',
         events: {
             'tap .js_save': 'save',
+            'tap .js_back': function() {
+                var that=this;
+                sl.confirm("您的新单信息尚未填充完成，确认后退",function() {
+                    that.back();
+                });
+            },
             'tap [data-upload]': 'upload'
         },
         onCreate: function() {
@@ -103,11 +109,11 @@
                     sl.tip("请填写车型");
                     return;
                 }
-                if(!sl.common.buyerInfo) {
+                if(!sl.common.buyerInfo||!sl.common.buyerInfo.name) {
                     sl.tip("请填写买方联系方式");
                     return;
                 }
-                if(!sellerInfo) {
+                if(!sellerInfo||!sellerInfo.name) {
                     sl.tip("请填写卖方联系方式");
                     return;
                 }

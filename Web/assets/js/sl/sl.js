@@ -355,7 +355,7 @@
         options: {
             route: null
         },
-        useAnimation: true,//,!/Android\s2/.test(navigator.userAgent),
+        useAnimation: !/Android\s2/.test(navigator.userAgent),
         animationName: null,
         application: null,
         el: '<div class="view"></div>',
@@ -437,11 +437,12 @@
                 overflow: 'hidden'
             });
 
-            if(that.useAnimation) {
-                that.$('header').css({ top: scrollY+'px',position: 'absolute' });
-                that.$('footer').each(function() {
-                    this.style.cssText='position: absolute;';
-                });
+            that.$('header').css({ top: scrollY+'px',position: 'absolute' });
+            that.$('footer').each(function() {
+                this.style.cssText='position: absolute;';
+            });
+
+            if(!that.useAnimation) {
             }
             that.application.mask.show();
             that.application.$el.addClass("screen");
@@ -457,11 +458,12 @@
                 window[$.isFunction(window.scrollTo)?'scrollTo':'scroll'](0,scrollTop||0);
             }
 
-            if(that.useAnimation) {
-                that.$el.addClass('active');
-                that.$('header,footer').each(function() {
-                    this.style.cssText="";
-                });
+            that.$el.addClass('active');
+            that.$('header,footer').each(function() {
+                this.style.cssText="";
+            });
+            if(!that.useAnimation) {
+                that.el.clientHeight;
             }
             that.application.mask.hide();
             that.application.$el.removeClass("screen");

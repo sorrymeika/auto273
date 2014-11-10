@@ -47,7 +47,7 @@
     int total;
     var data = SQL.QueryPage("AccountID",
         "AccountID,AccountName,a.ShopID,b.ShopName,Name,Role,Password",
-        "Account a join Shop b on a.ShopID=b.ShopID",
+        "Account a left join Shop b on a.ShopID=b.ShopID",
         where, page, pageSize, parameters, out total, sortDic);
 
     Json.Write(new { success = true, data = data, total = total }, Output);
