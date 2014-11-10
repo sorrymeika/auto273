@@ -101,6 +101,7 @@
     <Content Include="assets\js\sl\sl.js" />
     <Content Include="assets\js\sl\style.js" />
     <Content Include="assets\js\sl\tmpl.js" />
+    <Content Include="assets\js\sl\tween.js" />
     <Content Include="assets\js\sl\validation.js" />
     <Content Include="assets\js\sl\view.js" />
     <Content Include="assets\js\sl\widget\dialog.js" />
