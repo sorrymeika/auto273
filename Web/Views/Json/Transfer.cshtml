@@ -101,7 +101,12 @@
                     item.Photo5 = item.Photo5 != null ? url + item.Photo5.Photo : null;
 
                     var hasPhoto = !string.IsNullOrEmpty(item.Photo1) && !string.IsNullOrEmpty(item.Photo2) && !string.IsNullOrEmpty(item.Photo3) && !string.IsNullOrEmpty(item.Photo4) && !string.IsNullOrEmpty(item.Photo5);
-                    item.Persent = hasPhoto && item.AccountID != 0 && item.Seller != null && item.Buyer != null ? "100%" : "50%";
+
+                    var hasInfo = !string.IsNullOrEmpty(item.CarType) && !string.IsNullOrEmpty(item.Buyer) && !string.IsNullOrEmpty(item.BuyerMobile) && !string.IsNullOrEmpty(item.BuyerAddress) && !string.IsNullOrEmpty(item.Seller) && !string.IsNullOrEmpty(item.SellerMobile) && !string.IsNullOrEmpty(item.SellerAddress)
+                    && (item.Type == 0 || !string.IsNullOrEmpty(item.TransferRegion))
+                    && (item.Type == 1 || item.Price != 0);
+
+                    item.Persent = hasPhoto && item.AccountID != 0 && item.ShopID != 0 && hasInfo ? "100%" : "50%";
                 }
             }
         }
@@ -134,7 +139,12 @@
             item.Photo5 = item.Photo5 != null ? url + item.Photo5.Photo : null;
 
             var hasPhoto = !string.IsNullOrEmpty(item.Photo1) && !string.IsNullOrEmpty(item.Photo2) && !string.IsNullOrEmpty(item.Photo3) && !string.IsNullOrEmpty(item.Photo4) && !string.IsNullOrEmpty(item.Photo5);
-            item.Persent = hasPhoto && item.AccountID != 0 && item.Seller != null && item.Buyer != null ? "100%" : "50%";
+
+            var hasInfo = !string.IsNullOrEmpty(item.CarType) && !string.IsNullOrEmpty(item.Buyer) && !string.IsNullOrEmpty(item.BuyerMobile) && !string.IsNullOrEmpty(item.BuyerAddress) && !string.IsNullOrEmpty(item.Seller) && !string.IsNullOrEmpty(item.SellerMobile) && !string.IsNullOrEmpty(item.SellerAddress)
+            && (item.Type == 0 || !string.IsNullOrEmpty(item.TransferRegion))
+            && (item.Type == 1 || item.Price != 0);
+
+            item.Persent = hasPhoto && item.AccountID != 0 && item.ShopID != 0 && hasInfo ? "100%" : "50%";
         }
 
         Json.Write(new { success = true, data = item }, Output);

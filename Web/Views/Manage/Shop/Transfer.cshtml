@@ -53,7 +53,9 @@
         var data = SQL.QueryPage("TransferID",
             "TransferID,a.AccountID,AccountName,a.ShopID,b.ShopName,PlateNumber,[Type],[Status],CarType,Buyer,BuyerMobile,BuyerAddress,Seller,SellerMobile,SellerAddress,TransferRegion,Price,IsUpload,AddTime",
             "[Transfer] a join Shop b on a.ShopID=b.ShopID left join Account c on a.AccountID=c.AccountID",
-            where, page, pageSize, parameters, out total);
+            where, page, pageSize, parameters, out total, new Dictionary<string, bool>{
+                { "AddTime", false }
+            });
 
         if (data != null)
         {
@@ -81,12 +83,31 @@
                     item.Photo5 = item.Photo5 != null ? url + item.Photo5.Photo : null;
 
                     var hasPhoto = !string.IsNullOrEmpty(item.Photo1) && !string.IsNullOrEmpty(item.Photo2) && !string.IsNullOrEmpty(item.Photo3) && !string.IsNullOrEmpty(item.Photo4) && !string.IsNullOrEmpty(item.Photo5);
-                    item.Persent = hasPhoto && item.AccountID != 0 && item.Seller != null && item.Buyer != null ? "100%" : "50%";
+
+                    var hasInfo = !string.IsNullOrEmpty(item.CarType) && !string.IsNullOrEmpty(item.Buyer) && !string.IsNullOrEmpty(item.BuyerMobile) && !string.IsNullOrEmpty(item.BuyerAddress) && !string.IsNullOrEmpty(item.Seller) && !string.IsNullOrEmpty(item.SellerMobile) && !string.IsNullOrEmpty(item.SellerAddress)
+                    && (item.Type == 0 || !string.IsNullOrEmpty(item.TransferRegion))
+                    && (item.Type == 1 || item.Price != 0);
+
+                    item.Persent = hasPhoto && item.AccountID != 0 && item.ShopID != 0 && hasInfo ? "100%" : "50%";
                 }
             }
         }
 
         Json.Write(new { success = true, data = data, total = total }, Output);
+        return;
+    }
+    else if (Request["action"] == "export")
+    {
+        var data = SQL.Query("select b.ShopName as 店铺,PlateNumber,Buyer,BuyerMobile,BuyerAddress,Seller,SellerMobile,SellerAddress from [Transfer] a join Shop b on a.ShopID=b.ShopID left join Account c on a.AccountID=c.AccountID");
+
+        if (data.Count == 0)
+        {
+            return;
+        }
+
+        ExcelUtil.Export(data, Server.MapPath("~/Content/data.xls"));
+
+        Response.Redirect("/Content/data.xls");
         return;
     }
 
@@ -109,13 +130,15 @@
 var shops=@(new MvcHtmlString(Json.Encode(shops)));
 </script>
 <script>
-    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function ($,util,Buttons,popup) {
+    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function($,util,Buttons,popup) {
+        var img=$('<div style="display:none;position:absolute;top:0px;left: 0px;z-index:200;padding:10px; background:#555;"><img /></div>').appendTo(document.body);
+
 
         //工具栏
         var buttons=new Buttons('#toolbar',[{
             ico: "modify",
             value: "查看详情",
-            click: function () {
+            click: function() {
                 var data=grid.selectedRow().data;
                 popupAdd.control('id').html(data.TransferID);
                 popupAdd.control('type').html(data.Type==0?"过户":"转籍");
@@ -138,7 +161,32 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 popupAdd.control('photo4').html('<img width=120 heght=120 src="'+data.Photo4+'"/>');
                 popupAdd.control('photo5').html('<img width=120 heght=120 src="'+data.Photo5+'"/>');
 
+                popupAdd._form.find('img').on('mouseenter',function(e) {
+
+                    img.css({
+                        left: e.pageX,
+                        top: e.pageY+10
+                    }).show();
+
+                    img.find('img').attr('src',e.target.src.replace('/compress',''));
+
+                }).on('mousemove',function(e) {
+                    img.css({
+                        left: e.pageX,
+                        top: e.pageY+10
+                    });
+
+                }).on('mouseleave',function(e) {
+                    img.hide();
+                })
+
                 popupAdd.show();
+            }
+        },{
+            ico: "view",
+            value: "导出表格",
+            click: function() {
+                window.open('?action=export');
             }
         }]);
 
@@ -248,17 +296,18 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
             },
             buttons: [{
                 value: '关闭',
-                click: function () {
+                click: function() {
                     popupAdd.hide();
                 }
             }]
         });
 
+
         //列表
         var grid=$('#grid').grid({
             search: {
                 url: "?action=search",
-                beforeSend: function () {
+                beforeSend: function() {
                     buttons.items(0).disable();
                 },
                 data: {
@@ -301,7 +350,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                     }
                 }
             },
-            onRowSelect: function () {
+            onRowSelect: function() {
                 buttons.items(0).enable();
             },
             pageEnabled: true,
@@ -325,14 +374,14 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 text: "类型",
                 bind: "Type",
                 width: 6,
-                render: function (cell,data) {
+                render: function(cell,data) {
                     cell.append('<i class="gridCellItem">'+(data.Type==0?'过户':"转籍")+'</i>');
                 }
             },{
                 text: "状态",
                 bind: "Status",
                 width: 6,
-                render: function (cell,data) {
+                render: function(cell,data) {
                     cell.append('<i class="gridCellItem">'+(data.Status==0?'待补':"完成")+'</i>');
                 }
             },{

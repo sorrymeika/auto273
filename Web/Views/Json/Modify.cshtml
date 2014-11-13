@@ -8,17 +8,17 @@
     RequestUtil req = new RequestUtil();
 
     int id = req.Int("id", false, "缺少单据编号");
-    int shopId = req.Int("shopId", false, "请选择门店");
     string plateNumber = req.String("plateNumber", false, "请填写车牌号");
-    int type = req.Int("type", false, "请填写车牌号");
-    string carType = req.String("CarType", false, "请填写CarType");
-    string buyer = req.String("name", false, "请填写Buyer");
-    string buyerMobile = req.String("mobile", false, "请填写BuyerMobile");
-    string buyerAddress = req.String("address", false, "请填写BuyerAddress");
+    int type = req.Int("type", false, "请填写类型");
+    int shopId = req.Int("shopId", true, "请选择门店");
+    string carType = req.String("CarType", true, "请填写CarType");
+    string buyer = req.String("name", true, "请填写Buyer");
+    string buyerMobile = req.String("mobile", true, "请填写BuyerMobile");
+    string buyerAddress = req.String("address", true, "请填写BuyerAddress");
 
-    string seller = req.String("seller", false, "请填写Seller");
-    string sellerMobile = req.String("sellerMobile", false, "请填写SellerMobile");
-    string sellerAddress = req.String("sellerAddress", false, "请填写SellerAddress");
+    string seller = req.String("seller", true, "请填写Seller");
+    string sellerMobile = req.String("sellerMobile", true, "请填写SellerMobile");
+    string sellerAddress = req.String("sellerAddress", true, "请填写SellerAddress");
 
     string transferRegion = req.String("region");
     decimal price = req.Decimal("price");

@@ -29,19 +29,19 @@
         accountId = req.Int("accountId");
         uploadEmpty = true;
 
-        carType = req.String("CarType", false, "请填写CarType");
-        buyer = req.String("name", false, "请填写Buyer");
-        buyerMobile = req.String("mobile", false, "请填写BuyerMobile");
-        buyerAddress = req.String("address", false, "请填写BuyerAddress");
+        carType = req.String("CarType", true, "请填写CarType");
+        buyer = req.String("name", true, "请填写Buyer");
+        buyerMobile = req.String("mobile", true, "请填写BuyerMobile");
+        buyerAddress = req.String("address", true, "请填写BuyerAddress");
 
-        seller = req.String("seller", false, "请填写Seller");
-        sellerMobile = req.String("sellerMobile", false, "请填写SellerMobile");
-        sellerAddress = req.String("sellerAddress", false, "请填写SellerAddress");
+        seller = req.String("seller", true, "请填写Seller");
+        sellerMobile = req.String("sellerMobile", true, "请填写SellerMobile");
+        sellerAddress = req.String("sellerAddress", true, "请填写SellerAddress");
     }
     else
     {
         shopId = req.Int("shopId", false, "请选择门店");
-        uploadEmpty = false;
+        uploadEmpty = true;
         accountId = accountid;
     }
 
