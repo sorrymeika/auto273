@@ -105,9 +105,9 @@
             return;
         }
 
-        ExcelUtil.Export(data, Server.MapPath("~/Content/data.xls"));
+        ExcelUtil.Export(data, Server.MapPath("~/Content/data.xlsx"));
 
-        Response.Redirect("/Content/data.xls");
+        Response.Redirect("/Content/data.xlsx");
         return;
     }
 
