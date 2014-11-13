@@ -335,6 +335,10 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 render: function (cell,data) {
                     cell.append('<i class="gridCellItem">'+(data.Status==0?'待补':"完成")+'</i>');
                 }
+            },{
+                text: "编辑时间",
+                bind: "AddTime",
+                width: 6
             }]
         }).search();
 
