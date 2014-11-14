@@ -80,7 +80,7 @@
         strPhotos = strPhotos.Trim(',');
         if (!string.IsNullOrEmpty(strPhotos))
         {
-            db.Execute("update Photo set TransferID=@p0 where PhotoID in (" + String.Join(",", photos) + ")", transferId);
+            db.Execute("update Photo set TransferID=@p0 where PhotoID in (" + strPhotos + ")", transferId);
         }
 
     }
