@@ -66,7 +66,8 @@
                 for (int i = 0; i < data.Count; i++)
                 {
                     item = data[i];
-                    IList<dynamic> photos = db.Query("select [Type],Photo from [Photo] where TransferID=@p0", (int)item.TransferID);
+                    IList<dynamic> photos = db.Query("select [Type],Photo,Description from [Photo] where TransferID=@p0 order by [Type]", (int)item.TransferID);
+                    item.Photos = photos;
                     if (photos != null)
                     {
                         item.Photo1 = photos.FirstOrDefault(a => a.Type == 1);
@@ -130,7 +131,7 @@
 var shops=@(new MvcHtmlString(Json.Encode(shops)));
 </script>
 <script>
-    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function($,util,Buttons,popup) {
+    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function ($,util,Buttons,popup) {
         var img=$('<div style="display:none;position:absolute;top:0px;left: 0px;z-index:200;padding:10px; background:#555;"><img /></div>').appendTo(document.body);
 
 
@@ -138,7 +139,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
         var buttons=new Buttons('#toolbar',[{
             ico: "modify",
             value: "查看详情",
-            click: function() {
+            click: function () {
                 var data=grid.selectedRow().data;
                 popupAdd.control('id').html(data.TransferID);
                 popupAdd.control('type').html(data.Type==0?"过户":"转籍");
@@ -155,13 +156,23 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 popupAdd.control('sellerAddress').html(data.SellerAddress);
                 popupAdd.control('transferRegion').html(data.TransferRegion);
                 popupAdd.control('addTime').html(util.formatDate(data.AddTime));
+
+                console.log(data)
+                if(data.Photos) {
+                    var html=[];
+                    $.each(data.Photos,function (i,item) {
+                        html.push('<div><img style="cursor:pointer" width=120 heght=120 src="/'+item.Photo+'"/><p>'+item.Description+'</p></div>');
+                    });
+                    popupAdd.control('photos').html(html.join(''));
+                }
+                /*
                 popupAdd.control('photo1').html('<img width=120 heght=120 src="'+data.Photo1+'"/>');
                 popupAdd.control('photo2').html('<img width=120 heght=120 src="'+data.Photo2+'"/>');
                 popupAdd.control('photo3').html('<img width=120 heght=120 src="'+data.Photo3+'"/>');
                 popupAdd.control('photo4').html('<img width=120 heght=120 src="'+data.Photo4+'"/>');
                 popupAdd.control('photo5').html('<img width=120 heght=120 src="'+data.Photo5+'"/>');
-
-                popupAdd._form.find('img').on('mouseenter',function(e) {
+                */
+                popupAdd._form.find('img').on('mouseenter',function (e) {
 
                     img.css({
                         left: e.pageX,
@@ -170,14 +181,16 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
 
                     img.find('img').attr('src',e.target.src.replace('/compress',''));
 
-                }).on('mousemove',function(e) {
+                }).on('mousemove',function (e) {
                     img.css({
                         left: e.pageX,
                         top: e.pageY+10
                     });
 
-                }).on('mouseleave',function(e) {
+                }).on('mouseleave',function (e) {
                     img.hide();
+                }).on('click',function (e) {
+                    window.open(e.target.src.replace('/compress',''));
                 })
 
                 popupAdd.show();
@@ -185,7 +198,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
         },{
             ico: "view",
             value: "导出表格",
-            click: function() {
+            click: function () {
                 window.open('?action=export');
             }
         }]);
@@ -268,6 +281,12 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                     type: 'label',
                     width: 260
                 },
+                photos: {
+                    label: '图片：',
+                    type: 'label',
+                    labelVAlign: 'top',
+                    width: 260
+                }/*,
                 photo1: {
                     label: '行驶证：',
                     type: 'label',
@@ -292,11 +311,11 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                     label: '卖方身份证：',
                     type: 'label',
                     width: 260
-                }
+                }*/
             },
             buttons: [{
                 value: '关闭',
-                click: function() {
+                click: function () {
                     popupAdd.hide();
                 }
             }]
@@ -307,7 +326,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
         var grid=$('#grid').grid({
             search: {
                 url: "?action=search",
-                beforeSend: function() {
+                beforeSend: function () {
                     buttons.items(0).disable();
                 },
                 data: {
@@ -350,7 +369,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                     }
                 }
             },
-            onRowSelect: function() {
+            onRowSelect: function () {
                 buttons.items(0).enable();
             },
             pageEnabled: true,
@@ -374,14 +393,14 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 text: "类型",
                 bind: "Type",
                 width: 6,
-                render: function(cell,data) {
+                render: function (cell,data) {
                     cell.append('<i class="gridCellItem">'+(data.Type==0?'过户':"转籍")+'</i>');
                 }
             },{
                 text: "状态",
                 bind: "Status",
                 width: 6,
-                render: function(cell,data) {
+                render: function (cell,data) {
                     cell.append('<i class="gridCellItem">'+(data.Status==0?'待补':"完成")+'</i>');
                 }
             },{
