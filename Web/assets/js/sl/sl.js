@@ -457,11 +457,11 @@
             that.$('header,footer').each(function () {
                 this.style.cssText="";
             });
-            
+
             that.application.mask.hide();
             that.application.$el.removeClass("screen");
             that.application.el.clientHeight;
-            
+
             if(top!=null) {
                 that.$el.css({ top: top,height: '',marginBottom: that.$el.attr('anim-temp-margin-bottom'),overflow: '' }).removeAttr('anim-temp-top').removeAttr('anim-temp-scrolltop').removeAttr('anim-temp-margin-bottom');
                 that.el.clientHeight;
@@ -501,7 +501,10 @@
         },
 
         _transitionTime: function (time) {
-            this.el.style['-webkit-transition-duration']=(time||0)+'ms';
+            if(app.ios&&parseFloat(app.osVersion)<7)
+                this.el.style.webkitTransition="all "+(time||0)+'ms ease-out 0ms';
+            else
+                this.el.style.webkitTransitionDuration=(time||0)+'ms';
         },
 
         _animationFrom: function (name,type) {
@@ -552,7 +555,6 @@
                     activity._animationFrom(animationName,type+'_enter_animation-from');
                     that._animationFrom(animationName,type+'_exit_animation-from');
                     that.el.clientHeight;
-
                     that._transitionTime(duration);
                     activity._transitionTime(duration);
 
@@ -565,8 +567,11 @@
                         activity.finishEnterAnimation();
                         callback&&callback(activity);
                     });
-                    that._animationTo(animationName,type+'_exit_animation-to');
-                    activity._animationTo(animationName,type+'_enter_animation-to');
+
+                    setTimeout(function () {
+                        that._animationTo(animationName,type+'_exit_animation-to');
+                        activity._animationTo(animationName,type+'_enter_animation-to');
+                    },0);
 
                 } else {
                     activity.finishEnterAnimation();

@@ -9,6 +9,7 @@
         int page = req.Int("page");
         int pageSize = req.Int("pageSize", defaultValue: 10);
         int type = req.Int("type");
+        string keywords = req.String("keywords");
         string shopId = req.String("shopId");
         string accountId = req.String("accountId");
         DateTime dtFrom = req.DateTime("dtFrom");
@@ -35,6 +36,12 @@
         {
             where += " and a.ShopID=@p" + parameters.Count;
             parameters.Add(req.Int("shopId"));
+        }
+
+        if (!string.IsNullOrEmpty(keywords))
+        {
+            where += " and (PlateNumber=@p" + parameters.Count + " or b.ShopName=@p" + parameters.Count + ")";
+            parameters.Add(keywords);
         }
 
         if (!string.IsNullOrEmpty(accountId))
@@ -356,7 +363,9 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                         type: 'calendar'
                     },
                     shopId: {
-                        type: 'hidden',
+                        label: '门店：',
+                        type: 'select',
+                        options: shops,
                         value: util.getQueryString("?shopid")
                     },
                     accountId: {

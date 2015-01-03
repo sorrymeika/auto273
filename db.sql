@@ -81,3 +81,23 @@ TypeName varchar(500)
 
 --2014/11/09
 alter table Photo add [Type] int
+
+
+create table Brand (
+BrandID int primary key identity,
+BrandName varchar(200)
+)
+
+create table Serial (
+SerialID int primary key identity,
+SerialName varchar(200),
+BrandID int
+)
+
+alter table CarType add SerialID int
+
+--2015-01-01
+alter table Shop add ProvinceID int
+alter table Shop add CityID int
+alter table Admin add [Role] int
+alter table Admin add CityID int
