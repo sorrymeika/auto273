@@ -110,6 +110,7 @@
     <Content Include="assets\js\sl\widget\loading.js" />
     <Content Include="assets\js\sl\widget\waterfall.js" />
     <Content Include="assets\js\sl\store.js" />
+    <Content Include="assets\js\sl\widget\scroll.js" />
     <Content Include="assets\js\tmpl.js" />
     <Content Include="assets\js\ui\animation.js" />
     <Content Include="assets\js\ui\dialog.js" />
@@ -142,6 +143,7 @@
     <Content Include="assets\js\views\send.js" />
     <Content Include="assets\js\views\photosave.js" />
     <Content Include="assets\js\views\carType.js" />
+    <Content Include="assets\js\views\test.js" />
     <Content Include="assets\js\zepto.js" />
     <Content Include="assets\style.css" />
     <Content Include="assets\views\add.html" />
@@ -160,6 +162,7 @@
     <Content Include="assets\views\send.html" />
     <Content Include="assets\views\photosave.html" />
     <Content Include="assets\views\carType.html" />
+    <Content Include="assets\views\test.html" />
     <Content Include="Global.asax" />
     <Content Include="js\colorpicker\colorpicker.css" />
     <Content Include="js\colorpicker\colorpicker.js" />
@@ -509,6 +512,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Json\CarType.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Manage\Admin\DataImport.cshtml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

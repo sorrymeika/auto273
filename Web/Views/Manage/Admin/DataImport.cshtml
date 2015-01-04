@@ -1,0 +1,73 @@
+﻿@{
+    if (Request["action"] == "modify")
+    {
+        Layout = null;
+
+        var req = new SL.Util.RequestUtil();
+        var shop = req.File("shop", true, "", "xls,xlsx", "请上传xls或xlsx格式的文件");
+        var carType = req.File("carType", true, "", "xls,xlsx", "请上传xls或xlsx格式的文件");
+
+        if (req.HasError)
+        {
+            SL.Util.HtmlUtil.IFrameResult(new { success = false, msg = req.FirstError, errors = req.GetErrors() });
+            return;
+        }
+
+        if (!shop.IsEmpty)
+        {
+            string src = shop.Save();
+            IList<Dictionary<string, string>> data = SL.Util.ExcelUtil.LoadData(SL.Util.RequestFile.GetPath(src), new[] { "ShopName", "ProvinceID", "CityID" });
+            Dictionary<string, string> item;
+
+            if (data != null && data.Count != 0)
+            {
+                using (SL.Data.Database db = SL.Data.Database.Open())
+                {
+                    for (var i = 0; i < data.Count; i++)
+                    {
+                        item = data[i];
+                        db.Execute("insert into Shop (ShopName,ProvinceID,CityID) values (@p0,@p1,@p2)", item["ShopName"], int.Parse(item["ProvinceID"]), int.Parse(item["CityID"]));
+                    }
+                }
+            }
+        }
+
+
+
+        SL.Util.HtmlUtil.IFrameResult(new { success = true });
+        return;
+    }
+
+    Layout = "~/Views/Shared/_ManageLayout.cshtml";
+}
+<div id="form"></div>
+<script>
+	seajs.use(['jquery','lib/form','lib/global.css'],function ($) {
+
+		var form=$('#form').form({
+			title: "数据导入",
+			url: '?action=import',
+			controls: {
+				carType: {
+					label: '车型Excel',
+					type: 'file'
+				},{
+				shop: {
+					label: '门店Excel',
+					type: 'file'
+				}
+			},
+			buttons: [{
+				text: '导入',
+				handle: function () {
+					form.submit(function (res) {
+						if(res.success)
+							alert('导入成功！');
+						else
+							alert(res.msg);
+					});
+				}
+			}]
+		});
+	});
+</script>
