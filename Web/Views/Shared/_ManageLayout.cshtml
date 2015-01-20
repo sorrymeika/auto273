@@ -27,15 +27,26 @@
     <div class="main">
         <div class="menu">
             <div class="hd">菜单</div>
+            @{
+                var admin = SL.Util.SessionUtil.Get<dynamic>("Admin");
+            }
             <dl>
                 <dd><a href="@Url.Content("~/Manage/Signout")" style="color:#c00;">退出系统</a></dd>
-                <dt>门店管理</dt>
-                <dd><a href="@Url.Content("~/Manage/Shop/Shop")">门店管理</a></dd>
-                <dd><a href="@Url.Content("~/Manage/Shop/Account")">账号管理</a></dd>
-                <dd><a href="@Url.Content("~/Manage/Shop/Transfer")">过户单管理</a></dd>
-                <dd><a href="@Url.Content("~/Manage/Shop/CarType")">车型管理</a></dd>
+                @if (admin.AdminName != "admin")
+                {
+                    <dt>门店管理</dt>
+                    <dd><a href="@Url.Content("~/Manage/Shop/Shop")">门店管理</a></dd>
+                    <dd><a href="@Url.Content("~/Manage/Shop/Account")">账号管理</a></dd>
+                    <dd><a href="@Url.Content("~/Manage/Shop/Transfer")">过户单管理</a></dd>
+                    <dd><a href="@Url.Content("~/Manage/Shop/CarType")">车型管理</a></dd>
+                }
                 <dt>系统管理</dt>
                 <dd><a href="@Url.Content("~/Manage/Admin/ModifyPwd")">修改密码</a></dd>
+                <dd><a href="@Url.Content("~/Manage/Admin/DataImport")">数据导入</a></dd>
+                @if (admin.AdminName == "admin")
+                {
+                    <dd><a href="@Url.Content("~/Manage/Admin/Account")">系统账号管理</a></dd>
+                }
             </dl>
         </div>
         <div class="body">
@@ -43,7 +54,7 @@
         </div>
     </div>
     <script>
-        seajs.use('jquery',function ($) {
+        seajs.use('jquery',function($) {
             var pathname=window._pathname||location.pathname;
             $('.menu a[href*="'+pathname+'"]').parent().addClass('curr').siblings('.curr').removeClass('curr');
         });

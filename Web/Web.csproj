@@ -34,9 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System.Web.Helpers, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.Mvc, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.WebPages" />
-    <Reference Include="System.Web.Helpers" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -110,7 +110,6 @@
     <Content Include="assets\js\sl\widget\loading.js" />
     <Content Include="assets\js\sl\widget\waterfall.js" />
     <Content Include="assets\js\sl\store.js" />
-    <Content Include="assets\js\sl\widget\scroll.js" />
     <Content Include="assets\js\tmpl.js" />
     <Content Include="assets\js\ui\animation.js" />
     <Content Include="assets\js\ui\dialog.js" />
@@ -143,7 +142,6 @@
     <Content Include="assets\js\views\send.js" />
     <Content Include="assets\js\views\photosave.js" />
     <Content Include="assets\js\views\carType.js" />
-    <Content Include="assets\js\views\test.js" />
     <Content Include="assets\js\zepto.js" />
     <Content Include="assets\style.css" />
     <Content Include="assets\views\add.html" />
@@ -162,7 +160,6 @@
     <Content Include="assets\views\send.html" />
     <Content Include="assets\views\photosave.html" />
     <Content Include="assets\views\carType.html" />
-    <Content Include="assets\views\test.html" />
     <Content Include="Global.asax" />
     <Content Include="js\colorpicker\colorpicker.css" />
     <Content Include="js\colorpicker\colorpicker.js" />
@@ -515,6 +512,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Manage\Admin\DataImport.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Manage\Admin\Account.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

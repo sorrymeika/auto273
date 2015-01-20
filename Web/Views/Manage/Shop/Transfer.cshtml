@@ -2,6 +2,8 @@
 @using SL.Data
 @{
     RequestUtil req = new RequestUtil();
+    var admin = SL.Util.SessionUtil.Get<dynamic>("Admin");
+    int CityID = admin.CityID;
 
     if (Request["action"] == "search")
     {
@@ -15,7 +17,7 @@
         DateTime dtFrom = req.DateTime("dtFrom");
         DateTime dtTo = req.DateTime("dtTo");
 
-        string where = "b.Deleted=0";
+        string where = "b.Deleted=0 and b.CityID=" + CityID;
         IList<object> parameters = new List<object>();
         int total;
 
@@ -121,7 +123,7 @@
 
     Layout = "~/Views/Shared/_ManageLayout.cshtml";
 
-    var shops = SQL.Query("select ShopID as value,ShopName as text from Shop where Deleted=0");
+    var shops = SQL.Query("select ShopID as value,ShopName as text from Shop where Deleted=0 and CityID=@p0", CityID);
     if (shops != null)
     {
         shops.Insert(0, new
@@ -138,7 +140,7 @@
 var shops=@(new MvcHtmlString(Json.Encode(shops)));
 </script>
 <script>
-    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function ($,util,Buttons,popup) {
+    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function($,util,Buttons,popup) {
         var img=$('<div style="display:none;position:absolute;top:0px;left: 0px;z-index:200;padding:10px; background:#555;"><img /></div>').appendTo(document.body);
 
 
@@ -146,7 +148,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
         var buttons=new Buttons('#toolbar',[{
             ico: "modify",
             value: "查看详情",
-            click: function () {
+            click: function() {
                 var data=grid.selectedRow().data;
                 popupAdd.control('id').html(data.TransferID);
                 popupAdd.control('type').html(data.Type==0?"过户":"转籍");
@@ -167,7 +169,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 console.log(data)
                 if(data.Photos) {
                     var html=[];
-                    $.each(data.Photos,function (i,item) {
+                    $.each(data.Photos,function(i,item) {
                         html.push('<div><img style="cursor:pointer" width=120 heght=120 src="/'+item.Photo+'"/><p>'+item.Description+'</p></div>');
                     });
                     popupAdd.control('photos').html(html.join(''));
@@ -179,7 +181,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 popupAdd.control('photo4').html('<img width=120 heght=120 src="'+data.Photo4+'"/>');
                 popupAdd.control('photo5').html('<img width=120 heght=120 src="'+data.Photo5+'"/>');
                 */
-                popupAdd._form.find('img').on('mouseenter',function (e) {
+                popupAdd._form.find('img').on('mouseenter',function(e) {
 
                     img.css({
                         left: e.pageX,
@@ -188,15 +190,15 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
 
                     img.find('img').attr('src',e.target.src.replace('/compress',''));
 
-                }).on('mousemove',function (e) {
+                }).on('mousemove',function(e) {
                     img.css({
                         left: e.pageX,
                         top: e.pageY+10
                     });
 
-                }).on('mouseleave',function (e) {
+                }).on('mouseleave',function(e) {
                     img.hide();
-                }).on('click',function (e) {
+                }).on('click',function(e) {
                     window.open(e.target.src.replace('/compress',''));
                 })
 
@@ -205,7 +207,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
         },{
             ico: "view",
             value: "导出表格",
-            click: function () {
+            click: function() {
                 window.open('?action=export');
             }
         }]);
@@ -322,7 +324,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
             },
             buttons: [{
                 value: '关闭',
-                click: function () {
+                click: function() {
                     popupAdd.hide();
                 }
             }]
@@ -333,7 +335,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
         var grid=$('#grid').grid({
             search: {
                 url: "?action=search",
-                beforeSend: function () {
+                beforeSend: function() {
                     buttons.items(0).disable();
                 },
                 data: {
@@ -378,7 +380,7 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                     }
                 }
             },
-            onRowSelect: function () {
+            onRowSelect: function() {
                 buttons.items(0).enable();
             },
             pageEnabled: true,
@@ -402,14 +404,14 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 text: "类型",
                 bind: "Type",
                 width: 6,
-                render: function (cell,data) {
+                render: function(cell,data) {
                     cell.append('<i class="gridCellItem">'+(data.Type==0?'过户':"转籍")+'</i>');
                 }
             },{
                 text: "状态",
                 bind: "Status",
                 width: 6,
-                render: function (cell,data) {
+                render: function(cell,data) {
                     cell.append('<i class="gridCellItem">'+(data.Status==0?'待补':"完成")+'</i>');
                 }
             },{

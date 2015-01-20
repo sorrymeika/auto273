@@ -5,6 +5,9 @@
     {
         return;
     }
+    var CityID = SL.Web.Service.UserService.GetCityID(accountid);
+
+    SL.Util.CacheUtil.Set("hostaddress-" + Request.UserHostAddress, CityID);
 
     RequestUtil req = new RequestUtil();
 
@@ -15,7 +18,7 @@
         int type = req.Int("type");
         string keywords = req.String("keywords");
 
-        string where = "b.Deleted=0";
+        string where = "b.Deleted=0 and b.CityID=" + CityID;
         IList<object> parameters = new List<object>();
         int total;
 
@@ -111,7 +114,7 @@
             }
         }
 
-        Json.Write(new { success = true, data = data, total = total }, Output);
+        Json.Write(new { success = true, data = data, total = total, hostaddress = Request.UserHostAddress }, Output);
     }
     else if ("get".Equals(Request.QueryString["action"]))
     {

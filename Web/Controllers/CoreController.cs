@@ -31,8 +31,8 @@ namespace SL.Web.Controllers
 
         public ActionResult Manage(string catalog, string handle = null)
         {
-            string admin = SessionUtil.Get<string>("Admin");
-            if (string.IsNullOrEmpty(admin) && !"login".Equals(catalog, StringComparison.OrdinalIgnoreCase))
+            var admin = SessionUtil.Get<dynamic>("Admin");
+            if (admin == null && !"login".Equals(catalog, StringComparison.OrdinalIgnoreCase))
             {
                 if (Request.AcceptTypes.Contains("application/json"))
                 {

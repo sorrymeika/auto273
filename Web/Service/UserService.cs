@@ -52,6 +52,23 @@ namespace SL.Web.Service
             return IsLogin() ? (int)GetUser()["UserID"] : 0;
         }
 
+
+        public static int GetCityID(int accountid)
+        {
+            int id = 0;
+            if (CacheUtil.ExistCache("CityID" + accountid))
+            {
+                id = CacheUtil.Get<int>("CityID");
+                if (id != 0)
+                {
+                    return id;
+                }
+            }
+            id = SQL.QueryValue<int>("select CityID from Account where AccountID=@p0", accountid);
+            CacheUtil.Set("CityID", id);
+            return id;
+        }
+
         public static int GetAccountID(string account)
         {
             IDictionary<string, int> data;

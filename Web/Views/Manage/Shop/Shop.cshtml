@@ -2,6 +2,8 @@
 @using SL.Data
 @{
     RequestUtil req = new RequestUtil();
+    var admin = SL.Util.SessionUtil.Get<dynamic>("Admin");
+    int CityID = admin.CityID;
 
     if (Request["action"] == "search")
     {
@@ -19,7 +21,7 @@
             return;
         }
 
-        string where = "Deleted=0";
+        string where = "Deleted=0 and CityID=" + CityID;
         List<object> parameters = new List<object>();
         if (!string.IsNullOrEmpty(keywords))
         {
@@ -50,7 +52,7 @@
             return;
         }
 
-        SQL.Execute("insert into Shop (ShopName) values (@p0)", shopName);
+        SQL.Execute("insert into Shop (ShopName,CityID) values (@p0,@p1)", shopName, CityID);
 
         Json.Write(new { success = true }, Output);
         return;
@@ -93,20 +95,20 @@
 <div id="toolbar" class="toolbar"></div>
 <div id="grid"></div>
 <script>
-    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function ($,util,Buttons,popup) {
+    seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function($,util,Buttons,popup) {
 
         //工具栏
         var buttons=new Buttons('#toolbar',[{
             ico: "add",
             value: "添加",
-            click: function () {
+            click: function() {
                 popupAdd.show();
             }
         },{
             ico: "modify",
             value: "修改",
             disabled: true,
-            click: function () {
+            click: function() {
                 var data=grid.selectedRow().data;
 
                 popupModify.control('shopId').val(data.ShopID);
@@ -117,12 +119,12 @@
             ico: "delete",
             value: "停止门店",
             disabled: true,
-            click: function () {
+            click: function() {
                 var data=grid.selectedRow().data;
                 if(window.confirm('确认停止门店？'))
                     $.post('?action=delete',{
                         ShopID: data.ShopID
-                    },function (res) {
+                    },function(res) {
                         if(res.success) {
                             grid.searchCurrentPage();
                         } else
@@ -147,10 +149,10 @@
             },
             buttons: [{
                 value: '添加',
-                click: function () {
+                click: function() {
                     popupAdd.submit({
                         url: '?action=add',
-                        success: function (res) {
+                        success: function(res) {
                             if(res.success) {
                                 popupAdd.hide().reset();
                                 grid.searchCurrentPage();
@@ -162,7 +164,7 @@
                 }
             },{
                 value: '取消',
-                click: function () {
+                click: function() {
                     popupAdd.hide().reset();
                 }
             }]
@@ -187,10 +189,10 @@
             },
             buttons: [{
                 value: '修改',
-                click: function () {
+                click: function() {
                     popupModify.submit({
                         url: '?action=modify',
-                        success: function (res) {
+                        success: function(res) {
                             if(res.success) {
                                 popupModify.hide().reset();
                                 grid.searchCurrentPage();
@@ -202,7 +204,7 @@
                 }
             },{
                 value: '取消',
-                click: function () {
+                click: function() {
                     popupModify.hide().reset();
                 }
             }]
@@ -212,7 +214,7 @@
         var grid=$('#grid').grid({
             search: {
                 url: "?action=search",
-                beforeSend: function () {
+                beforeSend: function() {
                     buttons.items([1,2]).disable();
                 },
                 data: {
@@ -222,7 +224,7 @@
                     }
                 }
             },
-            onRowSelect: function () {
+            onRowSelect: function() {
                 buttons.items([1,2]).enable();
             },
             pageEnabled: true,
@@ -238,7 +240,7 @@
                 text: "查看",
                 bind: "Role",
                 width: 6,
-                render: function (cell,data) {
+                render: function(cell,data) {
                     cell.append('<i class="gridCellItem"><a href="Transfer?shopid='+data.ShopID+'" style="color:#c00">[下属过户单]</a></i>');
                 }
             }]

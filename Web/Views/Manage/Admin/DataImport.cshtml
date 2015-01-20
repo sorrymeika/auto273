@@ -1,11 +1,12 @@
 ﻿@{
-    if (Request["action"] == "modify")
+    if (Request["action"] == "import")
     {
         Layout = null;
 
         var req = new SL.Util.RequestUtil();
-        var shop = req.File("shop", true, "", "xls,xlsx", "请上传xls或xlsx格式的文件");
         var carType = req.File("carType", true, "", "xls,xlsx", "请上传xls或xlsx格式的文件");
+        var shop = req.File("shop", true, "", "xls,xlsx", "请上传xls或xlsx格式的文件");
+        var area = req.File("area", true, "", "xls,xlsx", "请上传xls或xlsx格式的文件");
 
         if (req.HasError)
         {
@@ -13,11 +14,51 @@
             return;
         }
 
+        Dictionary<string, string> item;
+
+        if (!carType.IsEmpty)
+        {
+            string src = carType.Save();
+
+            IList<Dictionary<string, string>>[] result = SL.Util.ExcelUtil.LoadData(SL.Util.RequestFile.GetPath(src),
+                new[] { "BrandID", "BrandName" },
+                new[] { "SerialID", "SerialName", "BrandID" },
+                new[] { "TypeID", "TypeName", "SerialID" });
+
+            IList<Dictionary<string, string>> data;
+            if (result != null && result.Length == 3)
+            {
+                using (SL.Data.Database db = SL.Data.Database.Open())
+                {
+                    data = result[0];
+                    for (var i = 0; i < data.Count; i++)
+                    {
+                        item = data[i];
+                        db.Execute("insert into Brand (BrandID,BrandName) values (@p0,@p1)", int.Parse(item["BrandID"]), item["BrandName"]);
+                    }
+
+                    data = result[1];
+                    for (var i = 0; i < data.Count; i++)
+                    {
+                        item = data[i];
+                        db.Execute("insert into Serial (SerialID,SerialName,BrandID) values (@p0,@p1,@p2)", int.Parse(item["SerialID"]), item["SerialName"], int.Parse(item["BrandID"]));
+                    }
+
+                    data = result[2];
+                    for (var i = 0; i < data.Count; i++)
+                    {
+                        item = data[i];
+                        db.Execute("insert into CarType (TypeID,TypeName,SerialID) values (@p0,@p1,@p2)", int.Parse(item["TypeID"]), item["TypeName"], int.Parse(item["SerialID"]));
+                    }
+                }
+            }
+        }
+
+
         if (!shop.IsEmpty)
         {
             string src = shop.Save();
             IList<Dictionary<string, string>> data = SL.Util.ExcelUtil.LoadData(SL.Util.RequestFile.GetPath(src), new[] { "ShopName", "ProvinceID", "CityID" });
-            Dictionary<string, string> item;
 
             if (data != null && data.Count != 0)
             {
@@ -33,6 +74,35 @@
         }
 
 
+        if (!area.IsEmpty)
+        {
+            string src = area.Save();
+
+            IList<Dictionary<string, string>>[] result = SL.Util.ExcelUtil.LoadData(SL.Util.RequestFile.GetPath(src),
+                new[] { "ProvinceID", "ProvinceName" },
+                new[] { "CityID", "CityName", "ProvinceID" });
+
+            IList<Dictionary<string, string>> data;
+            if (result != null && result.Length == 2)
+            {
+                using (SL.Data.Database db = SL.Data.Database.Open())
+                {
+                    data = result[0];
+                    for (var i = 0; i < data.Count; i++)
+                    {
+                        item = data[i];
+                        db.Execute("insert into Province (ProvinceID,ProvinceName) values (@p0,@p1)", int.Parse(item["ProvinceID"]), item["ProvinceName"]);
+                    }
+
+                    data = result[1];
+                    for (var i = 0; i < data.Count; i++)
+                    {
+                        item = data[i];
+                        db.Execute("insert into City (CityID,CityName,ProvinceID) values (@p0,@p1,@p2)", int.Parse(item["CityID"]), item["CityName"], int.Parse(item["ProvinceID"]));
+                    }
+                }
+            }
+        }
 
         SL.Util.HtmlUtil.IFrameResult(new { success = true });
         return;
@@ -42,32 +112,36 @@
 }
 <div id="form"></div>
 <script>
-	seajs.use(['jquery','lib/form','lib/global.css'],function ($) {
+    seajs.use(['jquery','lib/form','lib/global.css'],function($) {
 
-		var form=$('#form').form({
-			title: "数据导入",
-			url: '?action=import',
-			controls: {
-				carType: {
-					label: '车型Excel',
-					type: 'file'
-				},{
-				shop: {
-					label: '门店Excel',
-					type: 'file'
-				}
-			},
-			buttons: [{
-				text: '导入',
-				handle: function () {
-					form.submit(function (res) {
-						if(res.success)
-							alert('导入成功！');
-						else
-							alert(res.msg);
-					});
-				}
-			}]
-		});
-	});
+        var form=$('#form').form({
+            title: "数据导入",
+            url: '?action=import',
+            controls: {
+                carType: {
+                    label: '车型Excel',
+                    type: 'file'
+                },
+                shop: {
+                    label: '门店Excel',
+                    type: 'file'
+                },
+                area: {
+                    label: '省市Excel',
+                    type: 'file'
+                }
+            },
+            buttons: [{
+                text: '导入',
+                click: function() {
+                    form.submit(function(res) {
+                        if(res.success)
+                            alert('导入成功！');
+                        else
+                            alert(res.msg);
+                    });
+                }
+            }]
+        });
+    });
 </script>

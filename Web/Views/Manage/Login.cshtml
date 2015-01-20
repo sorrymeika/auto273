@@ -23,8 +23,9 @@
             }
             else
             {
-                SessionUtil.Set("Admin", adminName);
-                Response.Redirect(Url.Content("~/Manage/Shop/Shop"));
+                var data = SL.Data.SQL.QuerySingle("select AdminID,AdminName,CityID from Admin where AdminName=@p0", adminName);
+                SessionUtil.Set("Admin", data);
+                Response.Redirect(Url.Content("~/Manage/Admin/ModifyPwd"));
                 return;
             }
         }
@@ -33,8 +34,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>用户验证</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <title>用户验证</title><meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <style type="text/css">
         html { height: 100%; font-family: 微软雅黑; font-size: 12px; }
         body { height: 100%; margin: 0px; padding: 0px; background: #f1f1f1; }

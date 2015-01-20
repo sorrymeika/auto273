@@ -6,6 +6,9 @@ Password varchar(32)
 
 insert into Admin (AdminName,Password) values ('admin','E10ADC3949BA59ABBE56E057F20F883E')
 
+
+select AdminID,AdminName,a.CityID,b.CityName,b.ProvinceID,c.ProvinceName from Admin a left join City b on a.CityID=b.CityID left join Province c on b.ProvinceID=c.ProvinceID
+
 create table Shop (
 ShopID int identity primary key,
 ShopName varchar(20),
@@ -101,3 +104,32 @@ alter table Shop add ProvinceID int
 alter table Shop add CityID int
 alter table Admin add [Role] int
 alter table Admin add CityID int
+
+alter table Account add CityID int
+create table Province(
+	ProvinceID int primary key,
+	ProvinceName varchar(200)
+)
+create table City(
+	CityID int primary key,
+	CityName varchar(200),
+	ProvinceID int
+)
+
+drop table Brand
+create table Brand (
+BrandID int primary key,
+BrandName varchar(200)
+)
+
+drop table Serial
+create table Serial (
+SerialID int primary key,
+SerialName varchar(200),
+BrandID int
+)
+
+
+--注意替换福州的城市ID
+update Shop set CityID=福州的城市ID
+update Account set CityID=福州的城市ID

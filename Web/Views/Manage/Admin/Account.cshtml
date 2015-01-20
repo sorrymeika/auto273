@@ -1,9 +1,6 @@
 ﻿@using SL.Util
 @using SL.Data
 @{
-    var admin = SL.Util.SessionUtil.Get<dynamic>("Admin");
-    int CityID = admin.CityID;
-
     RequestUtil req = new RequestUtil();
 
     if (Request["action"] == "search")
@@ -13,8 +10,7 @@
         string keywords = req.String("Keywords");
         string sort = req.String("Sort");
         bool isAsc = req.Bool("Asc", defaultValue: false);
-        string role = req.String("role");
-        string shopId = req.String("shopId");
+        string cityId = req.String("cityId");
 
         if (req.HasError)
         {
@@ -22,32 +18,28 @@
             return;
         }
 
-        string where = "a.Deleted=0 and a.CityID=" + admin.CityID;
+        string where = "1=1";
         List<object> parameters = new List<object>();
         if (!string.IsNullOrEmpty(keywords))
         {
-            where += " and (AccountName like '%'+@p" + parameters.Count + "+'%' or Name like '%'+@p" + parameters.Count + "+'%')";
+            where += " and (AdminName like '%'+@p" + parameters.Count + "+'%')";
             parameters.Add(keywords);
         }
-        if (!string.IsNullOrEmpty(role))
+
+        if (!string.IsNullOrEmpty(cityId))
         {
-            where += " and Role=@p" + parameters.Count;
-            parameters.Add(req.Int("role"));
-        }
-        if (!string.IsNullOrEmpty(shopId))
-        {
-            where += " and a.ShopID=@p" + parameters.Count;
-            parameters.Add(req.Int("shopId"));
+            where += " and a.CityID=@p" + parameters.Count;
+            parameters.Add(req.Int("cityId"));
         }
 
         IDictionary<string, bool> sortDic = new Dictionary<string, bool>{
-            { string.IsNullOrEmpty(sort) ? "AccountID" : sort, isAsc }
+            { string.IsNullOrEmpty(sort) ? "AdminID" : sort, isAsc }
         };
 
         int total;
-        var data = SQL.QueryPage("AccountID",
-            "AccountID,AccountName,a.ShopID,b.ShopName,Name,Role,Password",
-            "Account a left join Shop b on a.ShopID=b.ShopID",
+        var data = SQL.QueryPage("AdminID",
+            "AdminID,AdminName,a.CityID,b.CityName,b.ProvinceID,c.ProvinceName",
+            "Admin a left join City b on a.CityID=b.CityID left join Province c on b.ProvinceID=c.ProvinceID",
             where, page, pageSize, parameters, out total, sortDic);
 
         Json.Write(new { success = true, data = data, total = total }, Output);
@@ -55,11 +47,9 @@
     }
     else if (Request["action"] == "add")
     {
-        string accountName = req.String("accountName", false, "请填写账号");
+        string adminName = req.String("adminName", false, "请填写账号");
         string password = req.Password("password", "请填写密码");
-        string name = req.String("name", false, "请填写姓名");
-        int role = req.Int("role", false, "请选择账号类型");
-        int shopId = req.Int("shopId");
+        int cityId = req.Int("cityId", false, "请选择账号地区");
 
         if (req.HasError)
         {
@@ -67,22 +57,20 @@
             return;
         }
 
-        if (SQL.Exists("select 1 from Account where AccountName=@p0 and Role=@p1", accountName, role))
+        if (SQL.Exists("select 1 from Admin where AdminName=@p0", adminName))
         {
             Json.Write(new { success = false, msg = "账号已存在" }, Output);
             return;
         }
 
-        SQL.Execute("insert into Account (AccountName,Password,Name,Role,ShopID,Deleted,CityID) values (@p0,@p1,@p2,@p3,@p4,0,@p5)", accountName, password, name, role, shopId, CityID);
+        SQL.Execute("insert into Admin (AdminName,Password,CityID,Role) values (@p0,@p1,@p2,1)", adminName, password, cityId);
 
         Json.Write(new { success = true }, Output);
         return;
     }
     else if (Request["action"] == "modify")
     {
-        int accountId = req.Int("AccountID", false, "请传入账号编号");
-        int shopId = req.Int("ShopID");
-        string name = req.String("Name", false, "请传入名称");
+        int accountId = req.Int("AdminID", false, "请传入账号编号");
         string password = req.String("Password");
 
         if (req.HasError)
@@ -91,11 +79,9 @@
             return;
         }
 
-        SQL.Execute("update Account set Name=@p1,ShopID=@p2 where AccountID=@p0", accountId, name, shopId);
-
         if (!string.IsNullOrEmpty(password))
         {
-            SQL.Execute("update Account set Password=@p1 where AccountID=@p0", accountId, req.Password("Password"));
+            SQL.Execute("update Account set Password=@p1 where AdminID=@p0", accountId, req.Password("Password"));
         }
 
         Json.Write(new { success = true }, Output);
@@ -103,7 +89,7 @@
     }
     else if (Request["action"] == "delete")
     {
-        int accountId = req.Int("AccountID", false, "请传入账号编号");
+        int accountId = req.Int("AdminID", false, "请传入账号编号");
 
         if (req.HasError)
         {
@@ -111,7 +97,7 @@
             return;
         }
 
-        SQL.Execute("update Account set Deleted=1 where AccountID=@p0", accountId);
+        SQL.Execute("delete Admin where AdminID=@p0", accountId);
 
         Json.Write(new { success = true }, Output);
         return;
@@ -119,21 +105,24 @@
 
     Layout = "~/Views/Shared/_ManageLayout.cshtml";
 
-    var shops = SQL.Query("select ShopID as value,ShopName as text from Shop where Deleted=0 and CityID=@p0", CityID);
-    if (shops != null)
+    var province = SQL.Query("select ProvinceID as value,ProvinceName as text from Province");
+    if (province != null)
     {
-        shops.Insert(0, new
+        province.Insert(0, new
         {
             value = "",
             text = "请选择"
         });
     }
+    var cities = SQL.Query("select CityID,CityName,ProvinceID from City");
+    
 }
-<h1>账号管理</h1>
+<h1>管理员账号管理</h1>
 <div id="toolbar" class="toolbar"></div>
 <div id="grid"></div>
 <script>
-var shops=@(new MvcHtmlString(Json.Encode(shops)));
+var province=@(new MvcHtmlString(Json.Encode(province)));
+var cities=@(new MvcHtmlString(Json.Encode(cities)));
 </script>
 <script>
     seajs.use(['jquery','lib/util','lib/buttons','lib/popup','lib/grid','lib/global.css'],function($,util,Buttons,popup) {
@@ -143,9 +132,6 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
             ico: "add",
             value: "添加",
             click: function() {
-                popupAdd.control('role').val()==1?
-                    popupAdd.control('shopId').hide():
-                    popupAdd.control('shopId').show();
 
                 popupAdd.show();
             }
@@ -155,25 +141,19 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
             disabled: true,
             click: function() {
                 var data=grid.selectedRow().data;
+                popupModify.control('accountId').val(data.AdminID);
 
-                popupModify.control('name').val(data.Name);
-                popupModify.control('shopId').val(data.ShopID);
-                (data.Role==0)
-                    ?popupModify.control('shopId').show()
-                    :popupModify.control('shopId').hide();
-
-                popupModify.control('accountId').val(data.AccountID);
                 popupModify.show();
             }
         },{
             ico: "delete",
-            value: "停用账号",
+            value: "删除账号",
             disabled: true,
             click: function() {
                 var data=grid.selectedRow().data;
-                if(window.confirm('确认停用账号？'))
+                if(window.confirm('确认删除账号？'))
                     $.post('?action=delete',{
-                        AccountID: data.AccountID
+                        AdminID: data.AdminID
                     },function(res) {
                         if(res.success) {
                             grid.searchCurrentPage();
@@ -184,11 +164,11 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
         }]);
 
         var popupAdd=new popup.Form({
-            title: '添加账号',
+            title: '添加管理员账号',
             width: 450,
             controls: {
-                accountName: {
-                    label: '账号',
+                adminName: {
+                    label: '管理员账号',
                     type: 'text',
                     width: 260,
                     validation: {
@@ -205,40 +185,31 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                         emptyText: '请填写密码'
                     }
                 },
-                name: {
-                    label: '姓名',
-                    type: 'text',
-                    width: 260,
-                    validation: {
-                        emptyAble: false,
-                        emptyText: '请填写姓名'
-                    }
-                },
-                role: {
-                    label: '账号类型',
+                provinceId: {
+                    label: '所属省份',
                     type: 'select',
                     emptyAble: false,
-                    options: [{
-                        value: 1,
-                        text: '业务员'
-                    },{
-                        value: 0,
-                        text: '商户'
-                    }],
+                    options: province,
                     events: {
                         'change': function(e) {
-                            $(e.target).val()==1?
-                                popupAdd.control('shopId').hide():
-                                popupAdd.control('shopId').show();
+                            var provId=$(e.target).val();
+                            var data=util.where(cities,function(item) {
+                                return item.ProvinceID==provId;
+                            });
+                            var city=popupAdd.control('cityId').clear().add(util.select(data,function(item) {
+                                return {
+                                    text: item.CityName,
+                                    value: item.CityID
+                                }
+                            }));
                         }
                     }
                 },
-                shopId: {
-                    label: '所属门店',
+                cityId: {
+                    label: '所属城市',
                     type: 'select',
-                    visible: false,
                     emptyAble: false,
-                    options: shops
+                    options: []
                 }
             },
             buttons: [{
@@ -271,23 +242,8 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                 accountId: {
                     type: 'hidden'
                 },
-                name: {
-                    label: '姓名',
-                    type: 'text',
-                    width: 260,
-                    validation: {
-                        emptyAble: false,
-                        emptyText: '请填写姓名'
-                    }
-                },
-                shopId: {
-                    label: '所属门店',
-                    type: 'select',
-                    emptyAble: false,
-                    options: shops
-                },
                 password: {
-                    label: '密码(选填)',
+                    label: '密码',
                     type: 'password',
                     width: 260
                 }
@@ -323,28 +279,25 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
                     buttons.items([1,2]).disable();
                 },
                 data: {
-                    role: {
-                        label: '账号类型',
-                        type: 'select',
-                        options: [{
-                            value: '',
-                            text: '请选择'
-                        },{
-                            value: 1,
-                            text: '业务员'
-                        },{
-                            value: 0,
-                            text: '商户'
-                        }]
-                    },
-                    shopId: {
-                        label: '所属店铺',
-                        type: 'select',
-                        options: shops
-                    },
                     keywords: {
                         label: "关键字：",
                         type: 'text'
+                    },
+                    provinceId: {
+                        label: '所属省份',
+                        type: 'select',
+                        emptyAble: false,
+                        options: province
+                    },
+                    cityId: {
+                        label: '所属城市',
+                        type: 'select',
+                        visible: false,
+                        emptyAble: false,
+                        options: [{
+                            text: '',
+                            value: ''
+                        }]
                     }
                 }
             },
@@ -354,36 +307,37 @@ var shops=@(new MvcHtmlString(Json.Encode(shops)));
             pageEnabled: true,
             columns: [{
                 text: "编号",
-                bind: "AccountID",
+                bind: "AdminID",
                 width: 3
             },{
                 text: "账号",
-                bind: "AccountName",
+                bind: "AdminName",
                 width: 10
             },{
-                text: "姓名",
-                bind: "Name",
+                text: "省",
+                bind: "ProvinceName",
                 width: 6
             },{
-                text: "所属门店",
-                bind: "ShopName",
+                text: "市",
+                bind: "CityName",
                 width: 6
-            },{
-                text: "类型",
-                bind: "Role",
-                width: 6,
-                render: function(cell,data) {
-                    cell.append('<i class="gridCellItem">'+(data.Role==0?'商户':"业务员")+'</i>');
-                }
-            },{
-                text: "查看",
-                bind: "Role",
-                width: 6,
-                render: function(cell,data) {
-                    cell.append('<i class="gridCellItem"><a href="Transfer?accountid='+data.AccountID+'" style="color:#c00">[下属过户单]</a></i>');
-                }
             }]
         }).search();
+
+
+        grid.searchInput('provinceId').on('change',function(e) {
+            var provId=$(e.target).val();
+            var data=util.where(cities,function(item) {
+                return item.ProvinceID==provId;
+            });
+            var city=grid.searchInput('cityId')[0];
+            city.options.length=0;
+
+            city.options.add(new Option('请选择',''));
+            $.each(data,function(i,item) {
+                city.options.add(new Option(item.CityName,item.CityID));
+            });
+        });
 
     });
 </script>

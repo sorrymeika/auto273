@@ -18,8 +18,15 @@
 
             that.loading=new Loading(that.$el);
 
+            var userinfo=JSON.parse(localStorage.getItem('USERINFO'))||{};
+            var data={};
+
+            data.auth=userinfo.Auth;
+            data.account=userinfo.AccountName;
+
             that.loading.load({
                 url: '/json/shop',
+                data: data,
                 success: function(res) {
                     this.hideLoading();
                     that.$list.html(that.tmpl("list",res));

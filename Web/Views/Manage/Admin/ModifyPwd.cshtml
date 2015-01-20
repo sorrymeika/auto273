@@ -18,8 +18,9 @@
             Json.Write(new { success = false, msg = "旧密码不正确" }, Output);
             return;
         }
+        var admin = SessionUtil.Get<dynamic>("Admin");
 
-        SL.Data.SQL.Execute("update Admin set Password=@p0 where AdminName='admin'", newpassword);
+        SL.Data.SQL.Execute("update Admin set Password=@p0 where AdminName=@p1", newpassword, admin.AdminName);
 
         Json.Write(new { success = true }, Output);
         return;
@@ -29,7 +30,7 @@
 }
 <div id="form"></div>
 <script>
-    seajs.use(['jquery','lib/form','lib/global.css'],function ($) {
+    seajs.use(['jquery','lib/form','lib/global.css'],function($) {
         var form=$('#form').form({
             title: "修改管理员密码",
             url: 'modifypwd?action=modify',
@@ -63,8 +64,8 @@
             },
             buttons: [{
                 value: '修改',
-                click: function () {
-                    form.submit(function (res) {
+                click: function() {
+                    form.submit(function(res) {
                         if(res.success)
                             alert('修改成功！');
                         else
